@@ -56,3 +56,41 @@
     - Attach commands to buttons such that:
         - Holding `RB` pulls note in.
         - Holding `LB` pushes note out.
+
+
+
+
+## Arm System
+### Implement the Subsystem
+- Include definitions for the motor controller and limit switch.
+- Create methods for basic PercentVBus rotation of the motor, as well as a method for accessing the limit switch state.
+- Add dashboard display of the limit switch state.
+- Create a command to raise and lower the Arm based on the XboxController.
+
+### Guidelines:
+#### Subsystem Creation
+- Define all motor controllers (Two Spark maxs) and sensors (Two hardware limit switches and one Through Bore Encoder) used in the system.
+- Construct these components in the constructor.
+- Remember to configure the controller properly.
+    - At the very least, reset to factory default.
+    - Then, configure the motor’s controllers to be on break mode and with current limit of 60 amp.  
+- You will need to have the following set of methods:
+    - A way to rotate the motor based on PercentVBus.
+        - You should have constant speeds for raising and lowering the arm. They can (and even should) be different. 
+    - A way to stop the motors rotation.
+    - A way to access limit switch information.
+    - A way to access the angle of the system, using the Through Bore Encoder.
+- Remember to add print of sensors information to the dashboard.
+- 
+#### Create Command
+- You'll need a command to run your system with an Xbox controller.
+- Create a command (or more) and attach them to buttons. At the very least, one button needs to raise the arm, and one should lower it.
+- Configure it so that holding the buttons is required. This eliminates the need for isFinished for the moment.
+- Don't use the limit switch in isFinished for now.
+  
+### Testing
+- Make sure the system moves as expected in both speeds and directions.
+- Check different speeds for razing and lowering the arm. Find optimal speeds and note them in your code.
+- Test the limit switch to make sure it works (use Shuffleboard to view its state).
+
+
