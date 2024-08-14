@@ -113,6 +113,49 @@
 
 
 
+## Shooter (Talya)
+### Implement the Subsystem
+- Define both motors for shooter and encoder.
+- Define your motor's built in PIDController
+- Configure the motors and PID.
+	- Factory reset both motors.
+ 	- Set the output limit to 1 and -1.
+  	- Reset the PID.
+
+
+### Guidelines:
+#### Subsystem Creation
+- Create basic methods such as:
+	- Rotating the motors 
+- Create the shooter, create relevant print and method for the shooter.
+	- Create a method that returns the velocity of the motor.
+	- Create a method that returns if the velocity got to the required RPM.
+
+#### Create Command
+- Create a command that rotates the motor to a selected velocity.
+	- It needs to be ran on the click of a button on a Xbox Controller.
+
+#### After Basic Creation
+ - Look for methods of rotating the wheel since it's a flywheel.
+ 	- Fly wheel means it just rotates freely it just needs to get to it's speed.
+ 	- Can you use FeedForward alone without PID?
+- Change the command you created to use PID or the method you decided to go with.
+
+### Testing
+- Using the Xbox Controller check if the wheel spins to the wanted velocity.
+
+### Requirements:
+#### Finished Subsystem Code
+- Able to get the shooter to get to wanted velocity in a quick time.
+- Tested for best methods for getting the motor to it's wanted velocity fast.
+
+#### Robot Code
+- Add the commands and their corresponding buttons to use them:
+	- Click X to run get to velocity command.
+
+
+
+
 ## Swerve (Shalev)
 ### Implement the Subsystem 
 There are some methods and abilities the swerve must have and some problems to fix. 
