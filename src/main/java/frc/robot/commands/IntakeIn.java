@@ -7,8 +7,8 @@ public class IntakeIn extends Command {
 
     private Intake intake;
 
-    public IntakeIn(){
-        this.intake = new Intake();
+    public IntakeIn(Intake intake){
+        this.intake = intake;
 
         addRequirements(intake);
     }
@@ -28,11 +28,12 @@ public class IntakeIn extends Command {
         intake.stop();
     }
 
-    @Override
+    /*@Override
     public boolean isFinished() {
         if(intake.getLeft() && intake.getRight()){
             return true;
         }
         return false;
     }
+     */
 }

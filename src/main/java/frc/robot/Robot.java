@@ -14,9 +14,10 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotInit() {
+        intake = new Intake();
         xbox = new XboxController(0);
-        new JoystickButton(xbox, XboxController.Button.kY.value).onTrue(new IntakeIn());
-        new JoystickButton(xbox, XboxController.Button.kX.value).onTrue(new IntakeOut());
+        new JoystickButton(xbox, XboxController.Button.kY.value).whileTrue(new IntakeIn(intake));
+        new JoystickButton(xbox, XboxController.Button.kX.value).whileTrue(new IntakeOut(intake));
 
     }
 
