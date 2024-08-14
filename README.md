@@ -149,7 +149,7 @@ For example, if you’re the blue alliance and you need to give positive speed i
 
 
 
-## Climb (Daniel)
+## Climb (Danielle)
 ### Implement the Subsystem
 - Include definitions for the motor controller and limit switches.
 - Create methods for basic PercentVBus rotation of the motor, as well as a method for accessing the limit switches state.
