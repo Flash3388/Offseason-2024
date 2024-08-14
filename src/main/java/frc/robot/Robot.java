@@ -1,12 +1,22 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.commands.IntakeIn;
+import frc.robot.commands.IntakeOut;
+import frc.robot.subsystems.Intake;
 
 public class Robot extends TimedRobot {
+    private Intake intake;
+    private XboxController xbox;
 
     @Override
     public void robotInit() {
+        xbox = new XboxController(0);
+        new JoystickButton(xbox, XboxController.Button.kY.value).onTrue(new IntakeIn());
+        new JoystickButton(xbox, XboxController.Button.kX.value).onTrue(new IntakeOut());
 
     }
 
