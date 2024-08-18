@@ -20,7 +20,7 @@ public class IntakeOut extends Command {
 
     @Override
     public void execute() {
-        intake.In();
+        intake.out();
     }
 
     @Override
@@ -28,12 +28,11 @@ public class IntakeOut extends Command {
         intake.stop();
     }
 
-    /*@Override
+    @Override
     public boolean isFinished() {
-        if((!(intake.getLeft())) && (!(intake.getRight()))){
+        if(intake.getLeft() && intake.getRight()){
             return true;
         }
         return false;
     }
-     */
 }
