@@ -43,6 +43,9 @@ public class Intake extends SubsystemBase {
     public void stop(){
         this.motor.stopMotor();
     }
+    public boolean cheakOut(){
+        return getLeft() && getRight();
+    }
 
     public void print(){
         SmartDashboard.putBoolean("digitalInputLeft", left.get());
