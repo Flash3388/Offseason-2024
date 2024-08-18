@@ -30,9 +30,6 @@ public class IntakeOut extends Command {
 
     @Override
     public boolean isFinished() {
-        if(intake.getLeft() && intake.getRight()){
-            return true;
-        }
-        return false;
+        return intake.getLeft() && intake.getRight();
     }
 }
