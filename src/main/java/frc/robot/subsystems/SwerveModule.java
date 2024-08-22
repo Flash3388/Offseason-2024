@@ -84,7 +84,7 @@ public class SwerveModule {
         steerPID.setPositionPIDWrappingMinInput(0);
         steerPID.setPositionPIDWrappingEnabled(true);
 
-        steerEncoder.setPosition((this.canCoder.getAbsolutePosition().getValue() - zeroAngle) / 360 * STEER_GEAR_RATIO);
+        steerEncoder.setPosition((this.canCoder.getAbsolutePosition().refresh().getValue() - zeroAngle) / 360 * STEER_GEAR_RATIO);
     }
 
     public double getHeadingDegrees() {
@@ -98,7 +98,7 @@ public class SwerveModule {
     }
 
     private double getAbsoluteHeadingDegrees() {
-        return canCoder.getAbsolutePosition().getValue();
+        return canCoder.getAbsolutePosition().refresh().getValue();
     }
 
     public double getVelocityRpm(){
@@ -147,8 +147,7 @@ public class SwerveModule {
     }
 
     public void setDesiredState(SwerveModuleState desiredState) {
-        SwerveModuleState state = optimize(desiredState, getRotation());
-
+        SwerveModuleState state = SwerveModuleState.optimize(desiredState,getRotation());
         setDriveVelocity(state.speedMetersPerSecond);
         setSteerPosition(state.angle.getDegrees());
     }
