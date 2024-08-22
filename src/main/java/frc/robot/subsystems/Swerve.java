@@ -1,6 +1,6 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.sensors.WPI_Pigeon2;
+import com.ctre.phoenix6.hardware.Pigeon2;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.*;
@@ -20,22 +20,22 @@ import static edu.wpi.first.units.Units.Meters;
 public class Swerve extends SubsystemBase {
 
 
-    private WPI_Pigeon2 pigeon;
-    private SwerveDriveOdometry odometry;
-    private SwerveModule[] swerveModules;
-    private SwerveDriveKinematics kinematics;
+    private final Pigeon2 pigeon;
+    private final SwerveDriveOdometry odometry;
+    private final SwerveModule[] swerveModules;
+    private final SwerveDriveKinematics kinematics;
     SysIdRoutine sysIdRoutine;
     public Swerve(SwerveModule[] swerveModules){
         sysIdRoutine = new SysIdRoutine(new SysIdRoutine.Config(), new SysIdRoutine.Mechanism(this::volatageDrive,this::sysidLog,this));
         this.swerveModules = swerveModules;
-        double distance = 0.37;
+        double distance = RobotMap.DISTANCE_MID_TO_CON;
         this.kinematics = new SwerveDriveKinematics(
                 new Translation2d(distance, distance),
                 new Translation2d(distance, -distance),
                 new Translation2d(-distance, distance),
                 new Translation2d(-distance,-distance)
         );
-        pigeon = new WPI_Pigeon2(RobotMap.PIGEON);
+        pigeon = new Pigeon2(RobotMap.PIGEON);
         odometry = new SwerveDriveOdometry(kinematics,pigeon.getRotation2d(),getModulesPosition());
 
     }
@@ -66,7 +66,7 @@ public class Swerve extends SubsystemBase {
         return kinematics.toChassisSpeeds(new SwerveDriveKinematics.SwerveDriveWheelStates(getModuleStates()));
     }
 
-    public void sysidLog(SysIdRoutineLog log) {
+    private void sysidLog(SysIdRoutineLog log) {
         SwerveModule frontLeft = swerveModules[0];
         SwerveModule frontRight = swerveModules[1];
 
