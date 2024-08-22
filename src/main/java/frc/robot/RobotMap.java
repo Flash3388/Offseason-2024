@@ -3,6 +3,7 @@ package frc.robot;
 public class RobotMap {
 
     public static final int PIGEON = 0;
+    public static final double ATTAINBLE_MAX_SPEED_MPS_SWERVE = 10;
     public static final double SWEARVE_ABSOLUTE_FL_ZERO_ANGLE = 91.2;
     public static final double SWEARVE_ABSOLUTE_FR_ZERO_ANGLE = 297.59;
     public static final double SWEARVE_ABSOLUTE_RL_ZERO_ANGLE = 35.1;

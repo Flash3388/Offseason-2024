@@ -96,14 +96,14 @@ public class Swerve extends SubsystemBase {
 
         SwerveModuleState[] swerveModuleStates;
         swerveModuleStates = kinematics.toSwerveModuleStates(new ChassisSpeeds(speedY,speedX,rotation));
-        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates,10);
+        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates,RobotMap.ATTAINBLE_MAX_SPEED_MPS_SWERVE);
         setDesiredState(swerveModuleStates);
     }
 
     public void drive(ChassisSpeeds speeds){
         SwerveModuleState[] swerveModuleStates;
         swerveModuleStates = kinematics.toSwerveModuleStates(speeds);
-        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates,4.4196);
+        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates,RobotMap.ATTAINBLE_MAX_SPEED_MPS_SWERVE);
         setDesiredState(swerveModuleStates);
     }
 

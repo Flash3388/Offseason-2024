@@ -1,6 +1,7 @@
 package frc.robot;
 
-import com.ctre.phoenix.sensors.CANCoder;
+
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.revrobotics.CANSparkLowLevel;
 import com.revrobotics.CANSparkMax;
 import frc.robot.subsystems.Swerve;
@@ -37,7 +38,7 @@ public class SystemFactory {
 
         return new SwerveModule(spark,
                 steerMotor,
-                new CANCoder(encoder),
+                new CANcoder(encoder),
                 zeroAngle,
                 identifier);
     }

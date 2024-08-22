@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.sensors.CANCoder;
+
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
@@ -37,7 +38,7 @@ public class SwerveModule {
 
     private final CANSparkMax drive;
     private final CANSparkMax steer;
-    private final CANCoder canCoder;
+    private final CANcoder canCoder;
 
     private final RelativeEncoder driveEncoder;
     private final RelativeEncoder steerEncoder;
@@ -48,7 +49,7 @@ public class SwerveModule {
 
     public SwerveModule(CANSparkMax drive,
                         CANSparkMax steer,
-                        CANCoder canCoder,
+                        CANcoder canCoder,
                         double zeroAngle,
                         String identifier){
         this.drive = drive;
@@ -83,7 +84,7 @@ public class SwerveModule {
         steerPID.setPositionPIDWrappingMinInput(0);
         steerPID.setPositionPIDWrappingEnabled(true);
 
-        steerEncoder.setPosition((this.canCoder.getAbsolutePosition() - zeroAngle) / 360 * STEER_GEAR_RATIO);
+        steerEncoder.setPosition((this.canCoder.getAbsolutePosition().getValue() - zeroAngle) / 360 * STEER_GEAR_RATIO);
     }
 
     public double getHeadingDegrees() {
@@ -97,7 +98,7 @@ public class SwerveModule {
     }
 
     private double getAbsoluteHeadingDegrees() {
-        return canCoder.getAbsolutePosition();
+        return canCoder.getAbsolutePosition().getValue();
     }
 
     public double getVelocityRpm(){
