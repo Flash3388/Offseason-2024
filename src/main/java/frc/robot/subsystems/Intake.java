@@ -15,8 +15,8 @@ public class Intake extends SubsystemBase {
     private static final double speedOut = -0.3;
 
     public Intake(){
-        this.motor.restoreFactoryDefaults();
         this.motor = new CANSparkMax(RobotMap.ID_MOTOR, CANSparkMax.MotorType.kBrushless);
+        this.motor.restoreFactoryDefaults();
         this.left = new DigitalInput(RobotMap.ID_LEFT);
         this.right = new DigitalInput(RobotMap.ID_RIGHT);
         this.motor.setIdleMode(CANSparkBase.IdleMode.kBrake);
