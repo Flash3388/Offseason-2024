@@ -30,6 +30,9 @@ public class UpAndDown extends Command {
 
     @Override
     public boolean isFinished() {
-        return climb.getf() || climb.getr();
+        if (direction){
+            return climb.getf();
+        }
+        return climb.getr();
     }
 }
