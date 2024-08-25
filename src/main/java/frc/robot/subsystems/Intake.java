@@ -48,7 +48,7 @@ public class Intake extends SubsystemBase {
     }
 
     public void print(){
-        SmartDashboard.putBoolean("digitalInputLeft", left.get());
-        SmartDashboard.putBoolean("digitalInputRight", right.get());
+        SmartDashboard.putBoolean("digitalInputLeft", !left.get());
+        SmartDashboard.putBoolean("digitalInputRight", !right.get());
     }
 }
