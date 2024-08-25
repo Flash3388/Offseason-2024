@@ -30,6 +30,6 @@ public class IntakeOut extends Command {
 
     @Override
     public boolean isFinished() {
-        return intake.cheakOut();
+        return false;
     }
 }

@@ -44,7 +44,7 @@ public class Intake extends SubsystemBase {
         this.motor.stopMotor();
     }
     public boolean cheakOut(){
-        return (!getLeft()) && (!getRight());
+        return (!getLeft()) || (!getRight());
     }
 
     public void print(){
