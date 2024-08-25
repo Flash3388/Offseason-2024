@@ -19,7 +19,8 @@ public class Climb extends SubsystemBase {
         motor.restoreFactoryDefaults();
     }
 
-    public void rotateUpForward(boolean forwardOrReverse){
+
+    public void rotateMotor(boolean forwardOrReverse){
         double x = forwardOrReverse ? 1 : -1;
         motor.set(x);
     }

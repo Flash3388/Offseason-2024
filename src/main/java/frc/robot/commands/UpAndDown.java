@@ -20,7 +20,7 @@ public class UpAndDown extends Command {
 
     @Override
     public void execute() {
-        climb.rotateUpForward(direction);
+        climb.rotateMotor(direction);
     }
 
     @Override
@@ -30,6 +30,6 @@ public class UpAndDown extends Command {
 
     @Override
     public boolean isFinished() {
-        return super.isFinished();
+        return climb.getf() || climb.getr();
     }
 }
