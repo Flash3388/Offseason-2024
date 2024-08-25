@@ -10,17 +10,19 @@ public class Climb extends SubsystemBase {
     private CANSparkMax motor;
     private SparkLimitSwitch forwardlimitswitch;
     private SparkLimitSwitch reverselimitswitch;
+    private static final double SPEED = 0.5;
 
     public Climb() {
         motor=new CANSparkMax(18, CANSparkLowLevel.MotorType.kBrushless);
 
-        forwardlimitswitch=  motor.getForwardLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen);
-        reverselimitswitch= motor.getReverseLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen);
+        forwardlimitswitch =  motor.getForwardLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen);
+        reverselimitswitch = motor.getReverseLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen);
+        motor.restoreFactoryDefaults();
     }
 
 
     public void rotateMotor(boolean forwardOrReverse){
-        double x = forwardOrReverse ? 1 : -1;
+        double x = forwardOrReverse ? SPEED : -SPEED;
         motor.set(x);
     }
     public void stop(){
