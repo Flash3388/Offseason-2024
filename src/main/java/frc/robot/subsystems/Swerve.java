@@ -28,7 +28,7 @@ public class Swerve extends SubsystemBase {
     public Swerve(SwerveModule[] swerveModules){
         sysIdRoutine = new SysIdRoutine(new SysIdRoutine.Config(), new SysIdRoutine.Mechanism(this::volatageDrive,this::sysidLog,this));
         this.swerveModules = swerveModules;
-        double distance = RobotMap.DISTANCE_MID_TO_CON;
+        double distance = RobotMap.DISTANCE_MODULE_TO_CENTER_CHASSIS_METERS;
         this.kinematics = new SwerveDriveKinematics(
                 new Translation2d(distance, distance),
                 new Translation2d(distance, -distance),
@@ -66,20 +66,6 @@ public class Swerve extends SubsystemBase {
         return kinematics.toChassisSpeeds(new SwerveDriveKinematics.SwerveDriveWheelStates(getModuleStates()));
     }
 
-    private void sysidLog(SysIdRoutineLog log) {
-        SwerveModule frontLeft = swerveModules[0];
-        SwerveModule frontRight = swerveModules[1];
-
-        log.motor("drive-left")
-                .voltage(frontLeft.getOutputVoltage())
-                .linearPosition(Meters.of(frontLeft.getPositionMeters()))
-                .linearVelocity(frontLeft.getLinearVelocity());
-
-        log.motor("drive-right")
-                .voltage(frontRight.getOutputVoltage())
-                .linearPosition(Meters.of(frontRight.getPositionMeters()))
-                .linearVelocity(frontRight.getLinearVelocity());
-    }
 
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
         return sysIdRoutine.quasistatic(direction);
@@ -151,5 +137,19 @@ public class Swerve extends SubsystemBase {
         for(int i =0; i <4; i++){
             swerveModules[i].periodic();
         }
+    }
+    private void sysidLog(SysIdRoutineLog log) {
+        SwerveModule frontLeft = swerveModules[0];
+        SwerveModule frontRight = swerveModules[1];
+
+        log.motor("drive-left")
+                .voltage(frontLeft.getOutputVoltage())
+                .linearPosition(Meters.of(frontLeft.getPositionMeters()))
+                .linearVelocity(frontLeft.getLinearVelocity());
+
+        log.motor("drive-right")
+                .voltage(frontRight.getOutputVoltage())
+                .linearPosition(Meters.of(frontRight.getPositionMeters()))
+                .linearVelocity(frontRight.getLinearVelocity());
     }
 }

@@ -18,7 +18,7 @@ public class RobotMap {
     public static final int SWERVE_LB_STEER_ID = 62;
     public static final int SWERVE_RB_STEER_ID = 32;
 
-    public static final double DISTANCE_MID_TO_CON =0.37;
+    public static final double DISTANCE_MODULE_TO_CENTER_CHASSIS_METERS  =0.37;
 
 
 }

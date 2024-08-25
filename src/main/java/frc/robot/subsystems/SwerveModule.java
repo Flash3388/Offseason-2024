@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkMax;
@@ -46,6 +47,7 @@ public class SwerveModule {
     private final SparkPIDController steerPID;
 
     private final String printName;
+    private StatusSignal statusSignal;
 
     public SwerveModule(CANSparkMax drive,
                         CANSparkMax steer,
@@ -85,6 +87,7 @@ public class SwerveModule {
         steerPID.setPositionPIDWrappingEnabled(true);
 
         steerEncoder.setPosition((this.canCoder.getAbsolutePosition().refresh().getValue() - zeroAngle) / 360 * STEER_GEAR_RATIO);
+        statusSignal = canCoder.getAbsolutePosition();
     }
 
     public double getHeadingDegrees() {

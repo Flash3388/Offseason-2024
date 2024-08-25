@@ -17,10 +17,10 @@ public class DriveWithXBox extends Command {
 
     @Override
     public void execute() {
-        double driveY = xboxController.getLeftY() * RobotMap.ATTAINBLE_MAX_SPEED_MPS_SWERVE;
+        double driveY =   xboxController.getLeftY() * RobotMap.ATTAINBLE_MAX_SPEED_MPS_SWERVE;
         double driveX = xboxController.getLeftX() * RobotMap.ATTAINBLE_MAX_SPEED_MPS_SWERVE;
-        double rotation = -xboxController.getRightX() *RobotMap.ATTAINBLE_MAX_SPEED_MPS_SWERVE;
-        swerve.drive(driveX ,driveY,rotation);
+        double rotation = xboxController.getRightX() *RobotMap.ATTAINBLE_MAX_SPEED_MPS_SWERVE;
+        swerve.drive(driveX , -driveY,rotation);
     }
 
     @Override

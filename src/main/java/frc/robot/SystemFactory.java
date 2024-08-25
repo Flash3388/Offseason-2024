@@ -11,7 +11,7 @@ import frc.robot.subsystems.SwerveModule;
 public class SystemFactory {
 
 
-    public SystemFactory(){
+    private SystemFactory(){
 
     }
 
