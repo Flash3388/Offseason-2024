@@ -33,6 +33,8 @@ public class UpAndDown extends Command {
         if (direction){
             return climb.getf();
         }
-        return climb.getr();
+        else {
+            return climb.getr();
+        }
     }
 }
