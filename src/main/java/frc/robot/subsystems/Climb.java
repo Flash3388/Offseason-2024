@@ -16,7 +16,6 @@ public class Climb extends SubsystemBase {
 
         forwardlimitswitch=  motor.getForwardLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen);
         reverselimitswitch= motor.getReverseLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen);
-        motor.restoreFactoryDefaults();
     }
 
 

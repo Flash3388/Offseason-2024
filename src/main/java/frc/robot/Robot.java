@@ -15,9 +15,11 @@ public class Robot extends TimedRobot {
     @Override
     public void robotInit() {
         xbox=new XboxController(0);
+        climb= new Climb();
         new JoystickButton(xbox, XboxController.Button.kA.value)
-                .whileTrue(new UpAndDown(climb, true));
-    new JoystickButton(xbox, XboxController.Button.kB.value).whileTrue(new UpAndDown(climb,false));}
+                .onTrue(new UpAndDown(climb, true));
+
+    new JoystickButton(xbox, XboxController.Button.kB.value).onTrue(new UpAndDown(climb,false));}
 
     @Override
     public void disabledInit() {
@@ -36,7 +38,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopPeriodic() {
-        climb.print();
+
     }
 
     @Override
@@ -62,6 +64,7 @@ public class Robot extends TimedRobot {
     @Override
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
+        climb.print();
     }
 
     @Override
