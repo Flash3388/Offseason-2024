@@ -1,13 +1,16 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.Shooter;
 
 public class Robot extends TimedRobot {
+    private Shooter shooter;
 
     @Override
     public void robotInit() {
-
+        this.shooter = new Shooter();
     }
 
     @Override
@@ -42,12 +45,10 @@ public class Robot extends TimedRobot {
 
     @Override
     public void testInit() {
-
     }
 
     @Override
     public void testPeriodic() {
-
     }
 
     @Override
