@@ -2,9 +2,11 @@ package frc.robot.subsystems;
 
 import com.revrobotics.*;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class Shooter extends Command {
+public class Shooter extends SubsystemBase {
  private CANSparkMax motor1;
  private CANSparkMax motor2;
 
@@ -17,11 +19,12 @@ public class Shooter extends Command {
  private double KI=0;
  public static double SPEAKER_SPEED_RPM = 4000;
  public static  double AMP_SPEED_RPM = 2000;
- public static double TOLERANCE = 250
+ public static double TOLERANCE = 250;
+ private static double KF = 0.000185;
 
  public Shooter(){
      motor1 = new CANSparkMax(12, CANSparkLowLevel.MotorType.kBrushless);
-     motor2 = new CANSparkMax(13, CANSparkLowLevel.MotorType.kBrushless);
+     motor2 = new CANSparkMax(14, CANSparkLowLevel.MotorType.kBrushless);
 
      motor1.restoreFactoryDefaults();
      motor2.restoreFactoryDefaults();
@@ -45,12 +48,12 @@ public class Shooter extends Command {
      motor1.setIdleMode(CANSparkBase.IdleMode.kCoast);
      motor2.setIdleMode(CANSparkBase.IdleMode.kCoast);
 
-
+     SmartDashboard.putNumber("KF Shooter", KF);
  }
 
  public void moveFF(double speed){
-  motor1.set(speed);
-  motor2.set(speed);
+  motor1.set(speed * KF);
+  motor2.set(speed * KF);
  }
 
  public void movePid(double speed){
@@ -81,5 +84,10 @@ public class Shooter extends Command {
  public void resetPid(){
      pidController1.setIAccum(0);
      pidController2.setIAccum(0);
+ }
+
+ public void print(){
+     SmartDashboard.putNumber("velocity 1",getV1());
+     SmartDashboard.putNumber("velocity 2", getV2());
  }
 }
