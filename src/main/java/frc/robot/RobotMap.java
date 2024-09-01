@@ -17,6 +17,8 @@ public class RobotMap {
     public static final int SWERVE_RF_STEER_ID = 42;
     public static final int SWERVE_LB_STEER_ID = 62;
     public static final int SWERVE_RB_STEER_ID = 32;
+    public static final double CHASSIS_RADIUS = 0.63;
+
 
     public static final double DISTANCE_MODULE_TO_CENTER_CHASSIS_METERS  =0.37;
     public static final double MAX_SPEED_SWERVE = 4.4;
