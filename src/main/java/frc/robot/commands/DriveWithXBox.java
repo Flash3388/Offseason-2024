@@ -23,7 +23,7 @@ public class DriveWithXBox extends Command {
         driveX = Math.abs(driveX) > 0.1 ? driveX * driveX * Math.signum(driveX) * RobotMap.ATTAINBLE_MAX_SPEED_MPS_SWERVE : 0;
         driveY = Math.abs(driveY) > 0.1 ? driveY * driveY * Math.signum(driveY) *  RobotMap.ATTAINBLE_MAX_SPEED_MPS_SWERVE: 0;
         rotation = Math.abs(rotation) > 0.1 ? rotation * Math.signum(rotation) * rotation * RobotMap.ATTAINBLE_MAX_SPEED_MPS_SWERVE : 0;
-        swerve.drive( -driveX , -driveY,rotation);
+        swerve.drive(-driveX ,-driveY,rotation);
     }
 
     @Override

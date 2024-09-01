@@ -151,7 +151,7 @@ public class SwerveModule {
 
     public void setDesiredState(SwerveModuleState desiredState) {
         SwerveModuleState state = SwerveModuleState.optimize(desiredState,getRotation());
-        setDriveVelocity(state.speedMetersPerSecond);
+        setDriveVelocity( -state.speedMetersPerSecond);
         setSteerPosition(state.angle.getDegrees());
     }
 
