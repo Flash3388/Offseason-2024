@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.*;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class Shooter extends Command {
@@ -16,10 +17,14 @@ public class Shooter extends Command {
  private double KI=0;
  public static double SPEAKER_SPEED_RPM = 4000;
  public static  double AMP_SPEED_RPM = 2000;
+ public static double TOLERANCE = 250
 
  public Shooter(){
      motor1 = new CANSparkMax(12, CANSparkLowLevel.MotorType.kBrushless);
      motor2 = new CANSparkMax(13, CANSparkLowLevel.MotorType.kBrushless);
+
+     motor1.restoreFactoryDefaults();
+     motor2.restoreFactoryDefaults();
 
      pidController1 = motor1.getPIDController();
      pidController2 = motor2.getPIDController();
@@ -31,22 +36,29 @@ public class Shooter extends Command {
      pidController2.setI(KI);
      pidController2.setD(KD);
 
+     pidController1.setOutputRange(-1,1);
+     pidController2.setOutputRange(-1,1);
+
      encoder1 = motor1.getEncoder();
      encoder2 = motor2.getEncoder();
 
-     motor1.restoreFactoryDefaults();
-     motor2.restoreFactoryDefaults();
-
      motor1.setIdleMode(CANSparkBase.IdleMode.kCoast);
      motor2.setIdleMode(CANSparkBase.IdleMode.kCoast);
+
+
  }
 
- public void Move(double speed){
+ public void moveFF(double speed){
   motor1.set(speed);
   motor2.set(speed);
  }
 
- public void Stop(){
+ public void movePid(double speed){
+     pidController1.setReference(speed, CANSparkBase.ControlType.kVelocity);
+     pidController2.setReference(speed, CANSparkBase.ControlType.kVelocity);
+ }
+
+ public void stop(){
   motor1.stopMotor();
   motor2.stopMotor();
  }
@@ -60,19 +72,14 @@ public class Shooter extends Command {
  }
 
  public boolean isAtRPM1(double RPM){
-  if(encoder1.getVelocity() >= RPM - 250 && encoder1.getVelocity() <= RPM + 250){
-   return true;
-  }
-  return false;
+    return MathUtil.isNear(RPM,encoder1.getVelocity(),TOLERANCE);
  }
  public boolean isAtRPM2(double RPM){
-  if(encoder2.getVelocity() >= RPM - 250 && encoder2.getVelocity() <= RPM + 250){
-   return true;
-  }
-  return false;
+  return MathUtil.isNear(RPM,encoder2.getVelocity(),TOLERANCE);
  }
 
-
-
-
+ public void resetPid(){
+     pidController1.setIAccum(0);
+     pidController2.setIAccum(0);
+ }
 }
