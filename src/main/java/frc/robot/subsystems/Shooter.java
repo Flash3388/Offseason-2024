@@ -1,9 +1,6 @@
 package frc.robot.subsystems;
 
-import com.revrobotics.CANSparkLowLevel;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkPIDController;
+import com.revrobotics.*;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class Shooter extends Command {
@@ -17,24 +14,31 @@ public class Shooter extends Command {
  private double KP =0;
  private double KD=0;
  private double KI=0;
- public static double speakerSPEED = 4000;
- public static  double ampSPEED = 2000;
+ public static double SPEAKER_SPEED_RPM = 4000;
+ public static  double AMP_SPEED_RPM = 2000;
 
  public Shooter(){
      motor1 = new CANSparkMax(12, CANSparkLowLevel.MotorType.kBrushless);
      motor2 = new CANSparkMax(13, CANSparkLowLevel.MotorType.kBrushless);
+
      pidController1 = motor1.getPIDController();
      pidController2 = motor2.getPIDController();
+
      pidController1.setP(KP);
      pidController1.setI(KI);
      pidController1.setD(KD);
      pidController2.setP(KP);
      pidController2.setI(KI);
      pidController2.setD(KD);
+
      encoder1 = motor1.getEncoder();
      encoder2 = motor2.getEncoder();
 
+     motor1.restoreFactoryDefaults();
+     motor2.restoreFactoryDefaults();
 
+     motor1.setIdleMode(CANSparkBase.IdleMode.kCoast);
+     motor2.setIdleMode(CANSparkBase.IdleMode.kCoast);
  }
 
  public void Move(double speed){
