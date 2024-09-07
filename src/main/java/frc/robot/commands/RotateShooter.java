@@ -9,6 +9,7 @@ public class RotateShooter extends Command {
     public RotateShooter(Shooter shooter,double speed){
         this.shooter=shooter;
         this.speed=speed;
+        addRequirements(shooter);
     }
 
     @Override

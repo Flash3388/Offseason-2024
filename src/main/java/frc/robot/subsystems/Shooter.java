@@ -5,6 +5,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotMap;
 
 public class Shooter extends SubsystemBase {
  private CANSparkMax motor1;
@@ -14,9 +15,6 @@ public class Shooter extends SubsystemBase {
  private RelativeEncoder encoder2;
  private SparkPIDController pidController1;
  private SparkPIDController pidController2;
- private double KP =0;
- private double KD=0;
- private double KI=0;
  public static double SPEAKER_SPEED_RPM = 4000;
  public static  double AMP_SPEED_RPM = 2000;
  public static double TOLERANCE = 250;
@@ -32,15 +30,17 @@ public class Shooter extends SubsystemBase {
      pidController1 = motor1.getPIDController();
      pidController2 = motor2.getPIDController();
 
-     pidController1.setP(KP);
-     pidController1.setI(KI);
-     pidController1.setD(KD);
-     pidController2.setP(KP);
-     pidController2.setI(KI);
-     pidController2.setD(KD);
+     pidController1.setP(RobotMap.KP12);
+     pidController1.setI(0);
+     pidController1.setD(0);
+     pidController2.setP(RobotMap.KP14);
+     pidController2.setI(0);
+     pidController2.setD(0);
+     pidController1.setFF(RobotMap.KF12);
+     pidController2.setFF(RobotMap.KF14);
 
-     pidController1.setOutputRange(-1,1);
-     pidController2.setOutputRange(-1,1);
+    pidController1.setOutputRange(-1,1);
+    pidController2.setOutputRange(-1,1);
 
      encoder1 = motor1.getEncoder();
      encoder2 = motor2.getEncoder();
