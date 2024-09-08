@@ -11,8 +11,8 @@ public class Intake extends SubsystemBase {
     private CANSparkMax motor;
     private DigitalInput left;
     private DigitalInput right;
-    private static final double speedIn = 0.3;
-    private static final double speedOut = -0.3;
+    private static final double speedIn = 0.4;
+    private static final double speedOut = -0.4;
 
     public Intake(){
         this.motor = new CANSparkMax(RobotMap.ID_MOTOR, CANSparkMax.MotorType.kBrushless);
@@ -50,5 +50,8 @@ public class Intake extends SubsystemBase {
     public void print(){
         SmartDashboard.putBoolean("digitalInputLeft", getLeft());
         SmartDashboard.putBoolean("digitalInputRight", getRight());
+    }
+    public void Move(double speed){
+        motor.set(speed);
     }
 }

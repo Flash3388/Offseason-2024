@@ -27,7 +27,7 @@ public class RotateShooter extends Command {
     public void execute() {
         shooter.movePid(speed);
         if(shooter.isAtRangePID1() && shooter.isAtRangePID2()){
-            intake.In();
+            intake.Move(0.5);
         }
     }
 
@@ -39,7 +39,7 @@ public class RotateShooter extends Command {
 
     @Override
     public boolean isFinished() {
-        if(!intake.cheakOut()){
+        if(!intake.checkout()){
             return true;
         }
         return false;
