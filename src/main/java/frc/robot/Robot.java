@@ -1,6 +1,5 @@
 package frc.robot;
 
-import edu.wpi.first.wpilibj.Joystick;
 import com.pathplanner.lib.commands.FollowPathHolonomic;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
@@ -18,19 +17,19 @@ import frc.robot.subsystems.Swerve;
 public class Robot extends TimedRobot {
     private Climb climb;
     private Swerve swerve;
-    private XboxController xbox;
+    private XboxController xboxController;
 
     @Override
     public void robotInit() {
-        xbox=new XboxController(0);
+        xboxController =new XboxController(0);
         climb= new Climb();
-        new JoystickButton(xbox, XboxController.Button.kA.value)
+        new JoystickButton(xboxController, XboxController.Button.kA.value)
                 .onTrue(new UpAndDown(climb, true));
         swerve = SystemFactory.createSwerve();
                 DriveWithXBox driveWithXBox = new DriveWithXBox(swerve,xboxController);
         swerve.setDefaultCommand(driveWithXBox);
 
-    new JoystickButton(xbox, XboxController.Button.kB.value).onTrue(new UpAndDown(climb,false));
+    new JoystickButton(xboxController, XboxController.Button.kB.value).onTrue(new UpAndDown(climb,false));
     }
 
     @Override
