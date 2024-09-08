@@ -17,7 +17,7 @@ public class Shooter extends SubsystemBase {
  private SparkPIDController pidController2;
  public static double SPEAKER_SPEED_RPM = 4000;
  public static  double AMP_SPEED_RPM = 2000;
- public static double TOLERANCE = 250;
+ public static double TOLERANCE = 150;
  private static double KF = 0.000185;
 
  public Shooter(){
@@ -80,6 +80,8 @@ public class Shooter extends SubsystemBase {
  public boolean isAtRPM2(double RPM){
   return MathUtil.isNear(RPM,encoder2.getVelocity(),TOLERANCE);
  }
+
+
 
  public void resetPid(){
      pidController1.setIAccum(0);
