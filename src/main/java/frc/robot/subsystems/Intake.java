@@ -24,7 +24,7 @@ public class Intake extends SubsystemBase {
 
     }
 
-    public void In(){
+    public void in(){
         this.motor.set(speedIn);
     }
 
@@ -33,22 +33,22 @@ public class Intake extends SubsystemBase {
     }
 
     public boolean getLeft(){
-        return this.left.get();
+        return (!this.left.get());
     }
 
     public boolean getRight(){
-        return this.right.get();
+        return (!this.right.get());
     }
 
     public void stop(){
         this.motor.stopMotor();
     }
-    public boolean cheakOut(){
-        return (!getLeft()) || (!getRight());
+    public boolean checkout(){
+        return (getLeft() || getRight());
     }
 
     public void print(){
-        SmartDashboard.putBoolean("digitalInputLeft", left.get());
-        SmartDashboard.putBoolean("digitalInputRight", right.get());
+        SmartDashboard.putBoolean("digitalInputLeft", getLeft());
+        SmartDashboard.putBoolean("digitalInputRight", getRight());
     }
 }

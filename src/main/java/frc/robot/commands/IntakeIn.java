@@ -20,7 +20,7 @@ public class IntakeIn extends Command {
 
     @Override
     public void execute() {
-        intake.In();
+        intake.in();
     }
 
     @Override
@@ -30,6 +30,6 @@ public class IntakeIn extends Command {
 
     @Override
     public boolean isFinished() {
-        return intake.cheakOut();
+        return intake.checkout();
     }
 }
