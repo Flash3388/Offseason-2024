@@ -3,13 +3,12 @@ package frc.robot.subsystems;
 import com.revrobotics.*;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
 
 public class Shooter extends SubsystemBase {
- private CANSparkMax motor1;
- private CANSparkMax motor2;
+ private CANSparkMax motor1; //right motor
+ private CANSparkMax motor2; //left motor
 
  private RelativeEncoder encoder1;
  private RelativeEncoder encoder2;
@@ -66,11 +65,11 @@ public class Shooter extends SubsystemBase {
   motor2.stopMotor();
  }
 
- public double getV1(){
+ public double getVelocity1(){
   return encoder1.getVelocity();
  }
 
- public double getV2(){
+ public double getVelocity2(){
   return encoder2.getVelocity();
  }
 
@@ -89,7 +88,7 @@ public class Shooter extends SubsystemBase {
  }
 
  public void print(){
-     SmartDashboard.putNumber("velocity 1",getV1());
-     SmartDashboard.putNumber("velocity 2", getV2());
+     SmartDashboard.putNumber("velocity 1", getVelocity1());
+     SmartDashboard.putNumber("velocity 2", getVelocity2());
  }
 }
