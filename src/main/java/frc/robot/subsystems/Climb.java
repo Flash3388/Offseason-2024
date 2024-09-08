@@ -10,7 +10,7 @@ public class Climb extends SubsystemBase {
     private CANSparkMax motor;
     private SparkLimitSwitch forwardlimitswitch;
     private SparkLimitSwitch reverselimitswitch;
-    private static final double SPEED = 0.5;
+    private static final double SPEED = 0.3;
 
     public Climb() {
         motor=new CANSparkMax(18, CANSparkLowLevel.MotorType.kBrushless);
