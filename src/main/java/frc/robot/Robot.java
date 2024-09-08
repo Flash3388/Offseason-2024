@@ -8,19 +8,28 @@ import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.commands.UpAndDown;
+import frc.robot.subsystems.Climb;
 import frc.robot.commands.DriveWithXBox;
 import frc.robot.subsystems.Swerve;
 
 public class Robot extends TimedRobot {
-    Swerve swerve;
-    XboxController xboxController;
+    private Climb climb;
+    private Swerve swerve;
+    private XboxController xboxController;
+
     @Override
     public void robotInit() {
+        xboxController =new XboxController(0);
+        climb= new Climb();
+        new JoystickButton(xboxController, XboxController.Button.kA.value)
+                .onTrue(new UpAndDown(climb, true));
         swerve = SystemFactory.createSwerve();
-        xboxController = new XboxController(0);
-        DriveWithXBox driveWithXBox = new DriveWithXBox(swerve,xboxController);
+                DriveWithXBox driveWithXBox = new DriveWithXBox(swerve,xboxController);
         swerve.setDefaultCommand(driveWithXBox);
 
+    new JoystickButton(xboxController, XboxController.Button.kB.value).onTrue(new UpAndDown(climb,false));
     }
 
     @Override
@@ -86,6 +95,7 @@ public class Robot extends TimedRobot {
     @Override
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
+        climb.print();
     }
 
     @Override
