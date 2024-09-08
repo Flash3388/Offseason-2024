@@ -31,10 +31,10 @@ public class UpAndDown extends Command {
     @Override
     public boolean isFinished() {
         if (direction){
-            return climb.getf();
+            return climb.getForward();
         }
         else {
-            return climb.getr();
+            return climb.getReverse();
         }
     }
 }

@@ -28,16 +28,16 @@ public class Climb extends SubsystemBase {
     public void stop(){
         motor.stopMotor();
     }
-    public Boolean getf(){
+    public Boolean getForward(){
         return forwardlimitswitch.isPressed();
     }
 
-    public boolean getr(){
+    public boolean getReverse(){
         return reverselimitswitch.isPressed();
     }
     public void print(){
-        SmartDashboard.putBoolean("forwardlimitswitch",getf());
-        SmartDashboard.putBoolean("reverselimitswitch", getr());
+        SmartDashboard.putBoolean("forwardlimitswitch", getForward());
+        SmartDashboard.putBoolean("reverselimitswitch", getReverse());
     }
 
 
