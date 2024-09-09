@@ -27,7 +27,7 @@ public class RotateShooter extends Command {
     public void execute() {
         shooter.movePid(speed);
         if(shooter.isAtRangePID1() && shooter.isAtRangePID2()){
-            intake.Move(0.5);
+            intake.in();
         }
     }
 
