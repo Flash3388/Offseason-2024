@@ -9,7 +9,7 @@ public class UpAndDown extends Command {
 
     public UpAndDown(Climb climb, boolean direction) {
         this.climb = climb;
-        this.direction= direction;
+        this.direction = direction;
         addRequirements(climb);
     }
 
@@ -30,10 +30,9 @@ public class UpAndDown extends Command {
 
     @Override
     public boolean isFinished() {
-        if (direction){
+        if (direction) {
             return climb.getForward();
-        }
-        else {
+        } else {
             return climb.getReverse();
         }
     }

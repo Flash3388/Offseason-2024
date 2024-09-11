@@ -29,18 +29,18 @@ public class Swerve extends SubsystemBase {
     private final SysIdRoutine sysIdRoutine;
     private final Field2d field;
 
-    public Swerve(SwerveModule[] swerveModules){
-        sysIdRoutine = new SysIdRoutine(new SysIdRoutine.Config(), new SysIdRoutine.Mechanism(this::volatageDrive,this::sysidLog,this));
+    public Swerve(SwerveModule[] swerveModules) {
+        sysIdRoutine = new SysIdRoutine(new SysIdRoutine.Config(), new SysIdRoutine.Mechanism(this::volatageDrive, this::sysidLog, this));
         this.swerveModules = swerveModules;
         double distance = RobotMap.DISTANCE_MODULE_TO_CENTER_CHASSIS_METERS;
         this.kinematics = new SwerveDriveKinematics(
                 new Translation2d(distance, distance),
                 new Translation2d(distance, -distance),
                 new Translation2d(-distance, distance),
-                new Translation2d(-distance,-distance)
+                new Translation2d(-distance, -distance)
         );
         pigeon = new Pigeon2(RobotMap.PIGEON);
-        odometry = new SwerveDriveOdometry(kinematics,pigeon.getRotation2d(),getModulesPosition());
+        odometry = new SwerveDriveOdometry(kinematics, pigeon.getRotation2d(), getModulesPosition());
         field = new Field2d();
         SmartDashboard.putData("Field", field);
     }
@@ -49,25 +49,25 @@ public class Swerve extends SubsystemBase {
         return odometry.getPoseMeters();
     }
 
-    public SwerveModulePosition[] getModulesPosition(){
+    public SwerveModulePosition[] getModulesPosition() {
         SwerveModulePosition[] swerveModulePositions = new SwerveModulePosition[4];
-        for(int i =0; i<4; i++){
+        for (int i = 0; i < 4; i++) {
             swerveModulePositions[i] = swerveModules[i].getModulePosition();
         }
 
         return swerveModulePositions;
     }
 
-    public SwerveModuleState[] getModuleStates(){
+    public SwerveModuleState[] getModuleStates() {
         SwerveModuleState[] swerveModuleStates = new SwerveModuleState[4];
-        for(int i =0; i <4; i++){
+        for (int i = 0; i < 4; i++) {
             swerveModuleStates[i] = swerveModules[i].getModuleStates();
         }
 
         return swerveModuleStates;
     }
 
-    public ChassisSpeeds getSpeeds(){
+    public ChassisSpeeds getSpeeds() {
         return kinematics.toChassisSpeeds(new SwerveDriveKinematics.SwerveDriveWheelStates(getModuleStates()));
     }
 
@@ -86,27 +86,27 @@ public class Swerve extends SubsystemBase {
         SmartDashboard.putNumber("SwerveCommandRot", rotation);
 
         SwerveModuleState[] swerveModuleStates;
-        swerveModuleStates = kinematics.toSwerveModuleStates(new ChassisSpeeds(speedY,speedX,rotation));
-        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates,RobotMap.ATTAINBLE_MAX_SPEED_MPS_SWERVE);
+        swerveModuleStates = kinematics.toSwerveModuleStates(new ChassisSpeeds(speedY, speedX, rotation));
+        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, RobotMap.ATTAINBLE_MAX_SPEED_MPS_SWERVE);
         setDesiredState(swerveModuleStates);
     }
 
-    public void drive(ChassisSpeeds speeds){
+    public void drive(ChassisSpeeds speeds) {
         SwerveModuleState[] swerveModuleStates;
         swerveModuleStates = kinematics.toSwerveModuleStates(speeds);
-        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates,RobotMap.ATTAINBLE_MAX_SPEED_MPS_SWERVE);
+        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, RobotMap.ATTAINBLE_MAX_SPEED_MPS_SWERVE);
         setDesiredState(swerveModuleStates);
     }
 
-    public void volatageDrive(Measure<Voltage> voltage){
+    public void volatageDrive(Measure<Voltage> voltage) {
         double volts = voltage.in(Units.Volts);
         double output = volts / RobotController.getBatteryVoltage();
 
         move(output, 0);
     }
 
-    public void setDesiredState(SwerveModuleState[] swerveModuleStates){
-        for(int i=0; i<4; i++){
+    public void setDesiredState(SwerveModuleState[] swerveModuleStates) {
+        for (int i = 0; i < 4; i++) {
             swerveModules[i].setDesiredState(swerveModuleStates[i]);
         }
     }
@@ -129,8 +129,8 @@ public class Swerve extends SubsystemBase {
         }
     }
 
-    public void stop(){
-        for(int i =0; i <4; i++){
+    public void stop() {
+        for (int i = 0; i < 4; i++) {
             swerveModules[i].stop();
         }
     }
@@ -140,7 +140,7 @@ public class Swerve extends SubsystemBase {
         Rotation2d rotation = pigeon.getRotation2d();
         SmartDashboard.putNumber("SwerveHeading", rotation.getDegrees());
 
-        for(int i =0; i <4; i++){
+        for (int i = 0; i < 4; i++) {
             swerveModules[i].periodic();
         }
 

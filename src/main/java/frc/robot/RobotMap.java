@@ -1,6 +1,18 @@
 package frc.robot;
 
 public class RobotMap {
+    public final static double SHOOTER_RIGHT_KP1 = 0.00000175;
+    public final static double SHOOTER_RIGHT_KP2 = 0.00018;
+    public final static double SHOOTER_LEFT_KP1 = 0.00000178;
+    public final static double SHOOTER_LEFT_KP2 = 0.00018;
+    public static final int SHOOTER_MOTOR_LEFT = 14;
+    public static final int SHOOTER_MOTOR_RIGHT = 12;
+    public static final double SHOOTER_SPEED_AMP = -700;
+    public static final double SHOOTER_SPEED_SPEAKER = -4000;
+
+    public static final int INTAKE_ID_MOTOR = 13;
+    public static final int INTAKE_ID_LEFT = 6;
+    public static final int INTAKE_ID_RIGHT = 8;
 
     public static final int PIGEON = 9;
     public static final double ATTAINBLE_MAX_SPEED_MPS_SWERVE = 4.5;
@@ -20,7 +32,7 @@ public class RobotMap {
     public static final double CHASSIS_RADIUS = 0.63;
 
 
-    public static final double DISTANCE_MODULE_TO_CENTER_CHASSIS_METERS  =0.37;
+    public static final double DISTANCE_MODULE_TO_CENTER_CHASSIS_METERS = 0.37;
     public static final double MAX_SPEED_SWERVE = 4.4;
 
 

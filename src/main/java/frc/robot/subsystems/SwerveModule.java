@@ -25,7 +25,7 @@ public class SwerveModule {
     private static final double DRIVE_GEAR_RATIO = 6.75;
     private static final double STEER_GEAR_RATIO = 12.8;
     private static final double WHEEL_RADIUS = 0.0508;
-    private static final double WHEEL_CIRCUMFERENCE = 2*Math.PI*WHEEL_RADIUS;
+    private static final double WHEEL_CIRCUMFERENCE = 2 * Math.PI * WHEEL_RADIUS;
 
     private static final double STEER_P = 0.56; // 0.05 //0.052 0053 0.054
     private static final double STEER_I = 0.00003; //0
@@ -53,7 +53,7 @@ public class SwerveModule {
                         CANSparkMax steer,
                         CANcoder canCoder,
                         double zeroAngle,
-                        String identifier){
+                        String identifier) {
         this.drive = drive;
         this.steer = steer;
         this.canCoder = canCoder;
@@ -102,10 +102,10 @@ public class SwerveModule {
 
     private double getAbsoluteHeadingDegrees() {
         statusSignal.refresh(true);
-        return statusSignal.getValueAsDouble()*360;
+        return statusSignal.getValueAsDouble() * 360;
     }
 
-    public double getVelocityRpm(){
+    public double getVelocityRpm() {
         return driveEncoder.getVelocity() / DRIVE_GEAR_RATIO;
     }
 
@@ -131,14 +131,14 @@ public class SwerveModule {
         return MetersPerSecond.of(velocity);
     }
 
-    public SwerveModuleState getModuleStates(){
+    public SwerveModuleState getModuleStates() {
         return new SwerveModuleState(
                 getVelocityMetersPerSecond(),
                 getRotation()
         );
     }
 
-    public SwerveModulePosition getModulePosition(){
+    public SwerveModulePosition getModulePosition() {
         return new SwerveModulePosition(
                 getPositionMeters(),
                 getRotation()
@@ -151,8 +151,8 @@ public class SwerveModule {
     }
 
     public void setDesiredState(SwerveModuleState desiredState) {
-        SwerveModuleState state = SwerveModuleState.optimize(desiredState,getRotation());
-        setDriveVelocity( -state.speedMetersPerSecond);
+        SwerveModuleState state = SwerveModuleState.optimize(desiredState, getRotation());
+        setDriveVelocity(-state.speedMetersPerSecond);
         setSteerPosition(state.angle.getDegrees());
     }
 
@@ -183,7 +183,7 @@ public class SwerveModule {
         steer.set(rotation);
     }
 
-    public void stop(){
+    public void stop() {
         drive.stopMotor();
         steer.stopMotor();
     }
