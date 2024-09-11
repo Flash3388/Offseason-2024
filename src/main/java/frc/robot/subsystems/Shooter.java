@@ -93,14 +93,14 @@ public class Shooter extends SubsystemBase {
         SmartDashboard.putNumber("velocity left", getVelocityLeft());
     }
 
-    public boolean isAtRangePIDRight(){
-     if(getVelocityRight() <= SmartDashboard.getNumber("speedShooter", 0) +150 && getVelocityRight() >= SmartDashboard.getNumber("speedShooter", 0) - 150){
+    public boolean isAtRangePIDRight(double speed){
+     if(getVelocityRight() <= speed +150 && getVelocityRight() >= speed - 150){
          return true;
      }
      return false;
  }
-    public boolean isAtRangePIDLeft(){
-        if(getVelocityLeft() <= SmartDashboard.getNumber("speedShooter", 0) +150 && getVelocityLeft() >= SmartDashboard.getNumber("speedShooter", 0) - 150){
+    public boolean isAtRangePIDLeft(double speed){
+        if(getVelocityLeft() <= speed+150 && getVelocityLeft() >= speed - 150){
             return true;
         }
         return false;

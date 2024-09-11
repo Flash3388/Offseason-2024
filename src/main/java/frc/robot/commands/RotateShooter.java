@@ -24,7 +24,7 @@ public class RotateShooter extends Command {
     @Override
     public void execute() {
         shooter.movePid(speed);
-        if(shooter.isAtRangePIDRight() && shooter.isAtRangePIDLeft()){
+        if(shooter.isAtRangePIDRight(speed) && shooter.isAtRangePIDLeft(speed)){
             intake.in();
         }
     }
