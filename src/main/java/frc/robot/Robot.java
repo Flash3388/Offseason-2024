@@ -6,11 +6,9 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import frc.robot.commands.IntakeIn;
-import frc.robot.commands.IntakeOut;
+import frc.robot.commands.*;
 import frc.robot.subsystems.Intake;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import frc.robot.commands.RotateShooter;
 import frc.robot.subsystems.Shooter;
 
 public class Robot extends TimedRobot {
@@ -23,7 +21,8 @@ public class Robot extends TimedRobot {
         this.intake = new Intake();
         this.shooter = new Shooter();
         xboxController = new XboxController(0);
-        new JoystickButton(xboxController, XboxController.Button.kB.value).onTrue(new RotateShooter(shooter, 0, intake));
+        new JoystickButton(xboxController, XboxController.Button.kB.value).onTrue(new ShooterAMP(shooter, RobotMap.SHOOTER_SPEED_AMP, intake));
+        new JoystickButton(xboxController, XboxController.Button.kA.value).onTrue(new ShooterSpeaker(shooter, RobotMap.SHOOTER_SPEED_SPEAKER, intake));
         new JoystickButton(xboxController, XboxController.Button.kY.value).onTrue(new IntakeIn(intake));
         new JoystickButton(xboxController, XboxController.Button.kX.value).whileTrue(new IntakeOut(intake));
     }
