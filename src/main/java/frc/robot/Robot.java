@@ -27,7 +27,7 @@ public class Robot extends TimedRobot {
         new JoystickButton(xboxController, XboxController.Button.kX.value).whileTrue(new IntakeOut(intake));
 
         this.shooter = new Shooter();
-        new JoystickButton(xboxController, XboxController.Button.kB.value).onTrue(new CheckPID(shooter, 0));
+        new JoystickButton(xboxController, XboxController.Button.kB.value).onTrue(new RotateShooter(shooter, intake));
     }
 
     @Override
