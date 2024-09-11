@@ -9,15 +9,16 @@ public class CheckPID extends Command {
     private Shooter shooter;
     private double speed;
 
-    public CheckPID(Shooter shooter, double speed){
-        this.shooter=shooter;
-        this.speed=speed;
+    public CheckPID(Shooter shooter, double speed) {
+        this.shooter = shooter;
+        this.speed = speed;
         addRequirements(shooter);
         SmartDashboard.putNumber("speedShooter", 0);
     }
+
     @Override
     public void initialize() {
-        speed= SmartDashboard.getNumber("speedShooter", 0);
+        speed = SmartDashboard.getNumber("speedShooter", 0);
         shooter.resetPid();
     }
 

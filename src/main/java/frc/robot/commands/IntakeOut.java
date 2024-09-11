@@ -7,7 +7,7 @@ public class IntakeOut extends Command {
 
     private Intake intake;
 
-    public IntakeOut(Intake intake){
+    public IntakeOut(Intake intake) {
         this.intake = intake;
 
         addRequirements(intake);

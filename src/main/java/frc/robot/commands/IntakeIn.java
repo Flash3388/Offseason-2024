@@ -7,7 +7,7 @@ public class IntakeIn extends Command {
 
     private Intake intake;
 
-    public IntakeIn(Intake intake){
+    public IntakeIn(Intake intake) {
         this.intake = intake;
 
         addRequirements(intake);

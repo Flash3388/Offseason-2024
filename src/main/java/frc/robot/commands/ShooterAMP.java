@@ -17,9 +17,9 @@ public class ShooterAMP extends Command {
 
     private boolean timerStarted;
 
-    public ShooterAMP(Shooter shooter, double speed, Intake intake){
-        this.shooter=shooter;
-        this.speed=speed;
+    public ShooterAMP(Shooter shooter, double speed, Intake intake) {
+        this.shooter = shooter;
+        this.speed = speed;
         this.intake = intake;
         this.timer = new Timer();
         this.fullRunTimer = new Timer();
@@ -42,7 +42,7 @@ public class ShooterAMP extends Command {
     public void execute() {
         shooter.movePid(speed);
 
-        if(shooter.isAtRangePIDRight(speed) && shooter.isAtRangePIDLeft(speed)){
+        if (shooter.isAtRangePIDRight(speed) && shooter.isAtRangePIDLeft(speed)) {
             intake.in();
         }
 
@@ -65,7 +65,7 @@ public class ShooterAMP extends Command {
 
     @Override
     public boolean isFinished() {
-        if(timer.hasElapsed(0.5)){
+        if (timer.hasElapsed(0.5)) {
             return true;
         }
         return false;

@@ -8,9 +8,10 @@ public class ShooterSpeaker extends Command {
     private Shooter shooter;
     private double speed;
     private Intake intake;
-    public ShooterSpeaker(Shooter shooter, double speed, Intake intake){
-        this.shooter=shooter;
-        this.speed=speed;
+
+    public ShooterSpeaker(Shooter shooter, double speed, Intake intake) {
+        this.shooter = shooter;
+        this.speed = speed;
         this.intake = intake;
         addRequirements(shooter, intake);
     }
@@ -23,7 +24,7 @@ public class ShooterSpeaker extends Command {
     @Override
     public void execute() {
         shooter.movePid(speed);
-        if(shooter.isAtRangePIDRight(speed) && shooter.isAtRangePIDLeft(speed)){
+        if (shooter.isAtRangePIDRight(speed) && shooter.isAtRangePIDLeft(speed)) {
             intake.in();
         }
     }
@@ -36,7 +37,7 @@ public class ShooterSpeaker extends Command {
 
     @Override
     public boolean isFinished() {
-        if(!intake.hasBall()){
+        if (!intake.hasBall()) {
             return true;
         }
         return false;
