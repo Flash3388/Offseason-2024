@@ -1,14 +1,18 @@
 package frc.robot;
 
-public class RobotMap {
-public final static double KP12 = 0.0000018;
-public final static double KF12 = 0.00018;
-public final static double KP14 = 0.0000018;
-public final static double KF14 = 0.00018;
+import java.security.PublicKey;
 
-    public static final int ID_MOTOR = 13;
-    public static final int ID_LEFT = 6;
-    public static final int ID_RIGHT = 8;
+public class RobotMap {
+public final static double SHOOTER_RIGHT_KP1 = 0.0000018;
+public final static double SHOOTER_RIGHT_KP2 = 0.00018;
+public final static double SHOOTER_LEFT_KP1 = 0.0000018;
+public final static double SHOOTER_LEFT_KP2 = 0.00018;
+public static final int SHOOTER_MOTOR_LEFT = 14;
+public static final int SHOOTER_MOTOR_RIGHT = 12;
+
+public static final int INTAKE_ID_MOTOR = 13;
+public static final int INTAKE_ID_LEFT = 6;
+public static final int INTAKE_ID_RIGHT = 8;
 
 
 }

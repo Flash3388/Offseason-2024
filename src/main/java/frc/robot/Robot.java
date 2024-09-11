@@ -20,13 +20,12 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotInit() {
-        intake = new Intake();
+        this.intake = new Intake();
+        this.shooter = new Shooter();
         xboxController = new XboxController(0);
+        new JoystickButton(xboxController, XboxController.Button.kB.value).onTrue(new RotateShooter(shooter, 0, intake));
         new JoystickButton(xboxController, XboxController.Button.kY.value).onTrue(new IntakeIn(intake));
         new JoystickButton(xboxController, XboxController.Button.kX.value).whileTrue(new IntakeOut(intake));
-
-        this.shooter = new Shooter();
-        new JoystickButton(xboxController, XboxController.Button.kB.value).onTrue(new RotateShooter(shooter, 0, intake));
     }
 
     @Override
@@ -46,7 +45,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopPeriodic() {
-        intake.print();
+
 
     }
 
@@ -73,7 +72,7 @@ public class Robot extends TimedRobot {
     @Override
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
-        shooter.print();
+
     }
 
     @Override
