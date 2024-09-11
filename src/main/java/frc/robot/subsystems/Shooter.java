@@ -7,99 +7,100 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
 
 public class Shooter extends SubsystemBase {
- private CANSparkMax motor1; //right motor
- private CANSparkMax motor2; //left motor
+ private CANSparkMax motorRight;
+ private CANSparkMax motorLeft;
 
- private RelativeEncoder encoder1;
- private RelativeEncoder encoder2;
- private SparkPIDController pidController1;
- private SparkPIDController pidController2;
+ private RelativeEncoder encoderRight;
+ private RelativeEncoder encoderLeft;
+ private SparkPIDController pidControllerRight;
+ private SparkPIDController pidControllerLeft;
  public static double SPEAKER_SPEED_RPM = 4000;
  public static  double AMP_SPEED_RPM = 2000;
  public static double TOLERANCE = 150;
  private static double KF = 0.000185;
 
  public Shooter(){
-     motor1 = new CANSparkMax(12, CANSparkLowLevel.MotorType.kBrushless);
-     motor2 = new CANSparkMax(14, CANSparkLowLevel.MotorType.kBrushless);
+     motorRight = new CANSparkMax(RobotMap.SHOOTER_MOTOR_RIGHT, CANSparkLowLevel.MotorType.kBrushless);
+     motorLeft = new CANSparkMax(RobotMap.SHOOTER_MOTOR_LEFT, CANSparkLowLevel.MotorType.kBrushless);
 
-     motor1.restoreFactoryDefaults();
-     motor2.restoreFactoryDefaults();
+     motorRight.restoreFactoryDefaults();
+     motorLeft.restoreFactoryDefaults();
 
-     pidController1 = motor1.getPIDController();
-     pidController2 = motor2.getPIDController();
+     pidControllerRight = motorRight.getPIDController();
+     pidControllerLeft = motorLeft.getPIDController();
 
-     pidController1.setP(RobotMap.KP12);
-     pidController1.setI(0);
-     pidController1.setD(0);
-     pidController2.setP(RobotMap.KP14);
-     pidController2.setI(0);
-     pidController2.setD(0);
-     pidController1.setFF(RobotMap.KF12);
-     pidController2.setFF(RobotMap.KF14);
+     pidControllerRight.setP(RobotMap.SHOOTER_RIGHT_KP1);
+     pidControllerRight.setI(0);
+     pidControllerRight.setD(0);
+     pidControllerLeft.setP(RobotMap.SHOOTER_LEFT_KP1);
+     pidControllerLeft.setI(0);
+     pidControllerLeft.setD(0);
+     pidControllerRight.setFF(RobotMap.SHOOTER_RIGHT_KP2);
+     pidControllerLeft.setFF(RobotMap.SHOOTER_LEFT_KP2);
 
-    pidController1.setOutputRange(-1,1);
-    pidController2.setOutputRange(-1,1);
+    pidControllerRight.setOutputRange(-1,1);
+    pidControllerLeft.setOutputRange(-1,1);
 
-     encoder1 = motor1.getEncoder();
-     encoder2 = motor2.getEncoder();
+     encoderRight = motorRight.getEncoder();
+     encoderLeft = motorLeft.getEncoder();
 
-     motor1.setIdleMode(CANSparkBase.IdleMode.kCoast);
-     motor2.setIdleMode(CANSparkBase.IdleMode.kCoast);
+     motorRight.setIdleMode(CANSparkBase.IdleMode.kCoast);
+     motorLeft.setIdleMode(CANSparkBase.IdleMode.kCoast);
 
      SmartDashboard.putNumber("KF Shooter", KF);
  }
 
  public void moveFF(double speed){
-  motor1.set(speed * KF);
-  motor2.set(speed * KF);
+  motorRight.set(speed * KF);
+  motorLeft.set(speed * KF);
  }
 
  public void movePid(double speed){
-     pidController1.setReference(speed, CANSparkBase.ControlType.kVelocity);
-     pidController2.setReference(speed, CANSparkBase.ControlType.kVelocity);
+     pidControllerRight.setReference(speed, CANSparkBase.ControlType.kVelocity);
+     pidControllerLeft.setReference(speed, CANSparkBase.ControlType.kVelocity);
  }
 
  public void stop(){
-  motor1.stopMotor();
-  motor2.stopMotor();
+  motorRight.stopMotor();
+  motorLeft.stopMotor();
  }
 
- public double getVelocity1(){
-  return encoder1.getVelocity();
+ public double getVelocityRight(){
+  return encoderRight.getVelocity();
  }
 
- public double getVelocity2(){
-  return encoder2.getVelocity();
+ public double getVelocityLeft(){
+  return encoderLeft.getVelocity();
  }
 
- public boolean isAtRPM1(double RPM){
-    return MathUtil.isNear(RPM,encoder1.getVelocity(),TOLERANCE);
+ public boolean isAtRPMRight(double RPM){
+    return MathUtil.isNear(RPM, encoderRight.getVelocity(),TOLERANCE);
  }
- public boolean isAtRPM2(double RPM){
-  return MathUtil.isNear(RPM,encoder2.getVelocity(),TOLERANCE);
+ public boolean isAtRPMLeft(double RPM){
+  return MathUtil.isNear(RPM, encoderLeft.getVelocity(),TOLERANCE);
  }
 
 
 
  public void resetPid(){
-     pidController1.setIAccum(0);
-     pidController2.setIAccum(0);
+     pidControllerRight.setIAccum(0);
+     pidControllerLeft.setIAccum(0);
  }
 
- public void print(){
-     SmartDashboard.putNumber("velocity 1", getVelocity1());
-     SmartDashboard.putNumber("velocity 2", getVelocity2());
- }
+    @Override
+    public void periodic() {
+        SmartDashboard.putNumber("velocity right", getVelocityRight());
+        SmartDashboard.putNumber("velocity left", getVelocityLeft());
+    }
 
- public boolean isAtRangePID1(){
-     if(getVelocity1() <= SmartDashboard.getNumber("speedShooter", 0) +150 && getVelocity1() >= SmartDashboard.getNumber("speedShooter", 0) - 150){
+    public boolean isAtRangePIDRight(){
+     if(getVelocityRight() <= SmartDashboard.getNumber("speedShooter", 0) +150 && getVelocityRight() >= SmartDashboard.getNumber("speedShooter", 0) - 150){
          return true;
      }
      return false;
  }
-    public boolean isAtRangePID2(){
-        if(getVelocity2() <= SmartDashboard.getNumber("speedShooter", 0) +150 && getVelocity2() >= SmartDashboard.getNumber("speedShooter", 0) - 150){
+    public boolean isAtRangePIDLeft(){
+        if(getVelocityLeft() <= SmartDashboard.getNumber("speedShooter", 0) +150 && getVelocityLeft() >= SmartDashboard.getNumber("speedShooter", 0) - 150){
             return true;
         }
         return false;

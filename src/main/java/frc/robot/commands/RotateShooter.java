@@ -9,8 +9,9 @@ public class RotateShooter extends Command {
     private Shooter shooter;
     private double speed;
     private Intake intake;
-    public RotateShooter(Shooter shooter, Intake intake){
+    public RotateShooter(Shooter shooter, double speed, Intake intake){
         this.shooter=shooter;
+        this.speed=speed;
         this.intake = intake;
         addRequirements(shooter, intake);
         SmartDashboard.putNumber("speedShooter", 0);
@@ -25,8 +26,8 @@ public class RotateShooter extends Command {
     @Override
     public void execute() {
         shooter.movePid(speed);
-        if(shooter.isAtRangePID1() && shooter.isAtRangePID2()){
-            intake.in();
+        if(shooter.isAtRangePIDRight() && shooter.isAtRangePIDLeft()){
+            intake.Move(0.5);
         }
     }
 
@@ -38,7 +39,7 @@ public class RotateShooter extends Command {
 
     @Override
     public boolean isFinished() {
-        if(!intake.checkout()){
+        if(!intake.hasBall()){
             return true;
         }
         return false;

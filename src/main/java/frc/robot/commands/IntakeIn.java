@@ -30,6 +30,6 @@ public class IntakeIn extends Command {
 
     @Override
     public boolean isFinished() {
-        return intake.checkout();
+        return intake.hasBall();
     }
 }

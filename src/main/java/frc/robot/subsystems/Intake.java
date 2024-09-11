@@ -11,25 +11,24 @@ public class Intake extends SubsystemBase {
     private CANSparkMax motor;
     private DigitalInput left;
     private DigitalInput right;
-    private static final double speedIn = 0.4;
-    private static final double speedOut = -0.4;
+    private static final double SPEED = 0.4;
 
     public Intake(){
-        this.motor = new CANSparkMax(RobotMap.ID_MOTOR, CANSparkMax.MotorType.kBrushless);
+        this.motor = new CANSparkMax(RobotMap.INTAKE_ID_MOTOR, CANSparkMax.MotorType.kBrushless);
         this.motor.restoreFactoryDefaults();
-        this.left = new DigitalInput(RobotMap.ID_LEFT);
-        this.right = new DigitalInput(RobotMap.ID_RIGHT);
+        this.left = new DigitalInput(RobotMap.INTAKE_ID_LEFT);
+        this.right = new DigitalInput(RobotMap.INTAKE_ID_RIGHT);
         this.motor.setIdleMode(CANSparkBase.IdleMode.kBrake);
 
 
     }
 
     public void in(){
-        this.motor.set(speedIn);
+        this.motor.set(SPEED);
     }
 
     public void out(){
-        this.motor.set(speedOut);
+        this.motor.set(-SPEED);
     }
 
     public boolean getLeft(){
@@ -43,11 +42,12 @@ public class Intake extends SubsystemBase {
     public void stop(){
         this.motor.stopMotor();
     }
-    public boolean checkout(){
+    public boolean hasBall(){
         return (getLeft() || getRight());
     }
 
-    public void print(){
+    @Override
+    public void periodic() {
         SmartDashboard.putBoolean("digitalInputLeft", getLeft());
         SmartDashboard.putBoolean("digitalInputRight", getRight());
     }
