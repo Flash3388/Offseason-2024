@@ -154,6 +154,9 @@ public class SwerveModule {
         setDriveVelocity( -state.speedMetersPerSecond);
         setSteerPosition(state.angle.getDegrees());
     }
+    public void resetEncoder(){
+        canCoder.setPosition(0);
+    }
 
     public void setDriveVelocity(double velocityMps) {
         double driveVelocity = velocityMps * 60 / WHEEL_CIRCUMFERENCE * DRIVE_GEAR_RATIO;
