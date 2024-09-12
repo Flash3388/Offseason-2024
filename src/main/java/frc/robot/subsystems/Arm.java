@@ -24,14 +24,16 @@ public class Arm extends SubsystemBase {
         leftMotor.restoreFactoryDefaults();
         rightMotor.restoreFactoryDefaults();
 
-        leftMotor.setSmartCurrentLimit(60);
-        rightMotor.setSmartCurrentLimit(60);
+        leftMotor.setSmartCurrentLimit(80);
+        rightMotor.setSmartCurrentLimit(80);
 
-        leftMotor.setIdleMode(CANSparkBase.IdleMode.kBrake);
-        rightMotor.setIdleMode(CANSparkBase.IdleMode.kBrake);
+        leftMotor.setIdleMode(CANSparkBase.IdleMode.kCoast);
+        rightMotor.setIdleMode(CANSparkBase.IdleMode.kCoast);
 
         upperSwitch = leftMotor.getForwardLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen);
+        upperSwitch.enableLimitSwitch(true);
         lowerSwitch = leftMotor.getReverseLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen);
+        lowerSwitch.enableLimitSwitch(true);
 
         rightMotor.follow(leftMotor, true);
 
@@ -52,7 +54,12 @@ public class Arm extends SubsystemBase {
         return (encoder.getAbsolutePosition() - encoder.getPositionOffset()) * 360;
     }
 
-    public void print(){
+    public boolean isAnyLimitSwitchActive(){
+        return (upperSwitch.isLimitSwitchEnabled() || lowerSwitch.isLimitSwitchEnabled());
+    }
+
+    @Override
+    public void periodic() {
         SmartDashboard.putNumber("Offset", encoder.getAbsolutePosition());
         SmartDashboard.putNumber("Absolute Arm position", getArmAngle());
         SmartDashboard.putNumber("Arm Master Output", leftMotor.getAppliedOutput());
@@ -62,9 +69,5 @@ public class Arm extends SubsystemBase {
 
         SmartDashboard.putNumber("Follower Set Velocity", rightMotor.get());
         SmartDashboard.putNumber("Master Set Velocity", leftMotor.get());
-    }
-
-    public boolean isAnyLimitSwitchActive(){
-        return (upperSwitch.isLimitSwitchEnabled() || lowerSwitch.isLimitSwitchEnabled());
     }
 }
