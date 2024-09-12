@@ -47,7 +47,7 @@ public class SwerveModule {
     private final SparkPIDController steerPID;
 
     private final String printName;
-    private StatusSignal statusSignal;
+    private final StatusSignal<Double> statusSignal;
 
     public SwerveModule(CANSparkMax drive,
                         CANSparkMax steer,
@@ -86,8 +86,8 @@ public class SwerveModule {
         steerPID.setPositionPIDWrappingMinInput(0);
         steerPID.setPositionPIDWrappingEnabled(true);
 
-        steerEncoder.setPosition((this.canCoder.getAbsolutePosition().refresh().getValue() - zeroAngle) / 360 * STEER_GEAR_RATIO);
         statusSignal = canCoder.getAbsolutePosition();
+        steerEncoder.setPosition((getAbsoluteHeadingDegrees() - zeroAngle) / 360 * STEER_GEAR_RATIO);
     }
 
     public double getHeadingDegrees() {
@@ -101,7 +101,8 @@ public class SwerveModule {
     }
 
     private double getAbsoluteHeadingDegrees() {
-        return canCoder.getAbsolutePosition().refresh().getValue();
+        statusSignal.refresh(true);
+        return statusSignal.getValueAsDouble()*360;
     }
 
     public double getVelocityRpm(){
@@ -197,6 +198,8 @@ public class SwerveModule {
         SmartDashboard.putNumber(printName + " Vel", getVelocityRpm());
         SmartDashboard.putNumber(printName + " VelOnM", driveEncoder.getVelocity());
         SmartDashboard.putNumber(printName + " VelMps", getVelocityMetersPerSecond());
+        SmartDashboard.putNumber(printName + " DriveAmps", drive.getOutputCurrent());
+        SmartDashboard.putNumber(printName + " SteerAmps", steer.getOutputCurrent());
     }
 
     private static SwerveModuleState optimize(SwerveModuleState desiredState, Rotation2d currentAngle) {
