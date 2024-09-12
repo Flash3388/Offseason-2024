@@ -195,6 +195,8 @@ public class SwerveModule {
         SmartDashboard.putNumber(printName + " Vel", getVelocityRpm());
         SmartDashboard.putNumber(printName + " VelOnM", driveEncoder.getVelocity());
         SmartDashboard.putNumber(printName + " VelMps", getVelocityMetersPerSecond());
+        SmartDashboard.putNumber(printName + " DriveAmps", drive.getOutputCurrent());
+        SmartDashboard.putNumber(printName + " SteerAmps", steer.getOutputCurrent());
     }
 
     private static SwerveModuleState optimize(SwerveModuleState desiredState, Rotation2d currentAngle) {

@@ -2,12 +2,14 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.*;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -24,7 +26,9 @@ public class Swerve extends SubsystemBase {
     private final SwerveDriveOdometry odometry;
     private final SwerveModule[] swerveModules;
     private final SwerveDriveKinematics kinematics;
-    SysIdRoutine sysIdRoutine;
+    private final SysIdRoutine sysIdRoutine;
+    private final Field2d field;
+
     public Swerve(SwerveModule[] swerveModules){
         sysIdRoutine = new SysIdRoutine(new SysIdRoutine.Config(), new SysIdRoutine.Mechanism(this::volatageDrive,this::sysidLog,this));
         this.swerveModules = swerveModules;
@@ -37,7 +41,8 @@ public class Swerve extends SubsystemBase {
         );
         pigeon = new Pigeon2(RobotMap.PIGEON);
         odometry = new SwerveDriveOdometry(kinematics,pigeon.getRotation2d(),getModulesPosition());
-
+        field = new Field2d();
+        SmartDashboard.putData("Field", field);
     }
 
     public Pose2d getPose() {
@@ -132,12 +137,17 @@ public class Swerve extends SubsystemBase {
 
     @Override
     public void periodic() {
-        odometry.update(pigeon.getRotation2d(),getModulesPosition());
+        Rotation2d rotation = pigeon.getRotation2d();
+        SmartDashboard.putNumber("SwerveHeading", rotation.getDegrees());
 
         for(int i =0; i <4; i++){
             swerveModules[i].periodic();
         }
+
+        odometry.update(rotation, getModulesPosition());
+        field.setRobotPose(odometry.getPoseMeters());
     }
+
     private void sysidLog(SysIdRoutineLog log) {
         SwerveModule frontLeft = swerveModules[0];
         SwerveModule frontRight = swerveModules[1];
