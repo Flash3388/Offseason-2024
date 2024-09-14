@@ -361,6 +361,51 @@ For example, if you’re the blue alliance and you need to give positive speed i
      
 ## Part 1.5
 
+We have several things to do to update, test and advance new features
+
+- Intake
+    - Try to align the sensors with tape to keep them in place temporarily
+    - Wait for build team to construct strong placements for them
+    - Go through code and look for problems
+ 
+- Arm
+    - Test Through-Bore interfacing via SparkMax
+        - Configure it to our wanted angle parameters
+    - Introduce Software limits via Through-bore
+    - Implement PID control for Arm
+        - Idealy, use Spark PIDF with Through-Bore connected to it
+        - See how to integrate smarter Feed-Forward
+        - Consider Smart Motion   
+
+- Climb
+    - Go through code and look for problems
+    - Check about motion directions and limit switches, as it was reported that they were inverted
+        - make sure limit switches stop motions actually
+
+- Shooter
+    - Look into new sensor to detect note passing through
+        - Find a sensor, solder it, place it on shooter and test it
+    - Go through code and look for problems
+    - Make sure shooter can reach any RPM quickly, take a look at graphes and such
+
+- Swerve
+    - Check pigeon functionality
+    - Check field odometery
+    - Check/implement field oriented drive
+    - Look into stabilizing rotation with PID 
+
+- Vision
+    - Noam and Yahav will train
+    - Learn about how to connect and configure limelight settings
+    - Produce results in steps
+        - AprilTag Detection
+            - configure to detect AprilTag
+            - explore possible settings
+            - write code to read AprilTag information
+        - Robot Pose extrapolation
+            - Configure Limelight to provide Robot Pose
+            - Read Robot pose from limelight and update odometery    
+
 ### Intake
 
 - Small convension fixes: uses of RobotMap, constants and such
