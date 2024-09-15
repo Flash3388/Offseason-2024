@@ -7,8 +7,8 @@ public class RobotMap {
     public final static double SHOOTER_LEFT_KP2 = 0.00018;
     public static final int SHOOTER_MOTOR_LEFT = 14;
     public static final int SHOOTER_MOTOR_RIGHT = 12;
-    public static final double SHOOTER_SPEED_AMP = -700;
-    public static final double SHOOTER_SPEED_SPEAKER = -4000;
+    public static final double SHOOTER_SPEED_AMP = 700;
+    public static final double SHOOTER_SPEED_SPEAKER = 4000;
 
     public static final int INTAKE_ID_MOTOR = 13;
     public static final int INTAKE_ID_LEFT = 6;

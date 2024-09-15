@@ -26,6 +26,9 @@ public class Shooter extends SubsystemBase {
         motorRight.restoreFactoryDefaults();
         motorLeft.restoreFactoryDefaults();
 
+        motorRight.setInverted(true);
+        motorLeft.setInverted(true);
+
         pidControllerRight = motorRight.getPIDController();
         pidControllerLeft = motorLeft.getPIDController();
 
