@@ -408,7 +408,7 @@ We have several things to do to update, test and advance new features
 
 ## Part 2
 
-We'll be following several work paths in different functionalities on the robot.
+We'll be following several work paths in different functionalities on the robot. 
 
 ### Swerve and PathPlanner
 
@@ -423,14 +423,14 @@ Fix Odometery tracking.
 
 Latest tests show confused detection in forward/backward motion. Forward motion moves the pose of the robot backwards and so. Likely caused by output from the drive encoders about direction or motion or by steer encoders. Investigate and fix.
 
+#### Stabilization
+
+The swerve has a tendency to drive to the side during y/x axes motion. Likely caused by swerve configuration and robot chassis weight distribution. fix.
+
 #### Pathplanner 
 
 Add support for pathplanner use.
 Throughly test paths with different complexity.
-
-#### Stabilization
-
-The swerve has a tendency to drive to the side during y/x axes motion. Likely caused by swerve configuration and robot chassis weight distribution. fix.
  
 ### Arm
 
@@ -457,3 +457,21 @@ Implement control code for the Arm based on the PIDF position loop integrated in
 There are several approaches to Arm control, and the system itself is quite difficult. Consider your options and try several approaches (all should be based on PIDF). Find the best one and use it. To keep the Arm stable, consider the use of FeedForward (either integrated or external). Consider using Smart motion as well, it might provide a good solution. Which ever option you try, tuning is key for it to function.
 
 ### Vision
+
+- Assignee: Yahav
+- Escort: Noam
+
+We'll be relying on vision to provide at least similar capabilities as used during the season. That is, identification of April Tags and robot pose estimation. We will use this approach again, with the intent to improve this so that it functions relaibly.
+
+The robot should properly detect april tags even at some distance and rely updates to the odometery. It is expected that the odometery will be accurate.
+
+Noam will teach Yahav how to use the Limelight and implement this. We may use vision for other things later.
+
+### Auto Shoot - Part 1
+
+- Assignee: Stav
+- Escort: Tom
+
+Fully automatic shooting depends on the full functionality of vision and arm. However, we can begin by implementing rudumentry parts of this system into the shooter.
+
+The shooter system component in this is to use evaluated distance to target and calibrate to a specific shooter speed accordingly. The difficult part here is to create a connection between the shooter speed and distance to target, which is some unknown function. We will be using interpolation to solve this. Tom will research the math necessary for this and instruct on how to implement.
