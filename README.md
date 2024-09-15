@@ -405,3 +405,55 @@ We have several things to do to update, test and advance new features
         - Robot Pose extrapolation
             - Configure Limelight to provide Robot Pose
             - Read Robot pose from limelight and update odometery    
+
+## Part 2
+
+We'll be following several work paths in different functionalities on the robot.
+
+### Swerve and PathPlanner
+
+- Assignee: Shalev
+- Escort: Tom/Maayan
+
+Work to improve the functionality of the Swerve system and include PathPlanner Support.
+
+#### Odometery
+
+Fix Odometery tracking.
+
+Latest tests show confused detection in forward/backward motion. Forward motion moves the pose of the robot backwards and so. Likely caused by output from the drive encoders about direction or motion or by steer encoders. Investigate and fix.
+
+#### Pathplanner 
+
+Add support for pathplanner use.
+Throughly test paths with different complexity.
+
+#### Stabilization
+
+The swerve has a tendency to drive to the side during y/x axes motion. Likely caused by swerve configuration and robot chassis weight distribution. fix.
+ 
+### Arm
+
+- Assignee: Niv
+- Escort: Tom/Maayan
+
+#### PIDF Control
+
+Add support for PIDF control of the Arm. Make sure it allows positioning the Arm at different angles, as well as keeping it stabilized and stationary when requested.
+
+The Arm has a Through-Bore encoder connected to one of the SparkMax controllers which control a motor of the Arm (motor controller ID 16) via the absolute encoder port. This allows interfacing with the encoder in SparkMax algorithms. See the following example to access the sensor in code:
+```java
+AbsoluteEncoder encoder = motor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle);
+encoder.setZeroOffset(OFFSET_TO_ZERO); // configure the zero at an offset from the actual zero
+encoder.setPositionConversionFactor(360); // will convert all position values (even inside the SparkMax) to work with degrees
+
+// you will need to configure the PIDF to use this sensor. see https://codedocs.revrobotics.com/java/com/revrobotics/sparkpidcontroller#setFeedbackDevice(com.revrobotics.MotorFeedbackSensor)
+```
+
+This encoder will serve as the basis for arm control algorithm.
+
+Implement control code for the Arm based on the PIDF position loop integrated in the SparkMax. Recall there are two motors which are supposed to work in unison, consider how to handle that.
+
+There are several approaches to Arm control, and the system itself is quite difficult. Consider your options and try several approaches (all should be based on PIDF). Find the best one and use it. To keep the Arm stable, consider the use of FeedForward (either integrated or external). Consider using Smart motion as well, it might provide a good solution. Which ever option you try, tuning is key for it to function.
+
+### Vision
