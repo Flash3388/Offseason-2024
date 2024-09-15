@@ -15,10 +15,10 @@ public class Climb extends SubsystemBase {
 
     public Climb() {
         motor = new CANSparkMax(RobotMap.CLIMB_MOTOR_ID, CANSparkLowLevel.MotorType.kBrushless);
+        motor.restoreFactoryDefaults();
 
         forwardlimitswitch = motor.getForwardLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen);
         reverselimitswitch = motor.getReverseLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen);
-        motor.restoreFactoryDefaults();
     }
 
 
@@ -43,5 +43,6 @@ public class Climb extends SubsystemBase {
     public void periodic() {
         SmartDashboard.putBoolean("ClimbForwardLimitSwitch", getForward());
         SmartDashboard.putBoolean("ClimbReverseLimitSwitch", getReverse());
+        SmartDashboard.putNumber("climeMotor", motor.getOutputCurrent());
     }
 }

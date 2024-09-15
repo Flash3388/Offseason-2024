@@ -25,22 +25,29 @@ public class RotateShooter extends Command {
     @Override
     public void execute() {
         shooter.movePid(speed);
-        if (shooter.isAtRangePIDRight(speed) && shooter.isAtRangePIDLeft(speed)) {
+        /*if (shooter.isAtRangePIDRight(speed) && shooter.isAtRangePIDLeft(speed)) {
             intake.in();
         }
+
+         */
     }
 
     @Override
     public void end(boolean interrupted) {
-        shooter.stop();
+        /*shooter.stop();
         intake.stop();
+
+         */
     }
 
     @Override
     public boolean isFinished() {
-        if (!intake.hasBall()) {
+        /*if (!intake.hasBall()) {
             return true;
         }
+        return false;
+
+         */
         return false;
     }
 

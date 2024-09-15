@@ -40,9 +40,20 @@ public class Swerve extends SubsystemBase {
                 new Translation2d(-distance, -distance)
         );
         pigeon = new Pigeon2(RobotMap.PIGEON);
-        odometry = new SwerveDriveOdometry(kinematics, pigeon.getRotation2d(), getModulesPosition());
+        pigeon.setYaw(0);
+        odometry = new SwerveDriveOdometry(kinematics, getHeadingDegrees(), getModulesPosition());
         field = new Field2d();
         SmartDashboard.putData("Field", field);
+    }
+
+    public Rotation2d getHeadingDegrees(){
+        double degrees = pigeon.getRotation2d().getDegrees();
+        degrees %= 360;
+        if(degrees < 0){
+            degrees += 360;
+        }
+
+        return Rotation2d.fromDegrees(degrees);
     }
 
     public Pose2d getPose() {
@@ -137,8 +148,9 @@ public class Swerve extends SubsystemBase {
 
     @Override
     public void periodic() {
-        Rotation2d rotation = pigeon.getRotation2d();
+        Rotation2d rotation = getHeadingDegrees();
         SmartDashboard.putNumber("SwerveHeading", rotation.getDegrees());
+        SmartDashboard.putNumber("HeadingRaw", pigeon.getRotation2d().getDegrees());
 
         for (int i = 0; i < 4; i++) {
             swerveModules[i].periodic();
