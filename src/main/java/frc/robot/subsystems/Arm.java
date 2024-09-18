@@ -16,10 +16,11 @@ public class Arm extends SubsystemBase {
 
     private final DutyCycleEncoder encoder;
     private final SparkPIDController pidController;
+    private final AbsoluteEncoder absoluteEncoder;
 
     public Arm() {
-        leftMotor = new CANSparkMax(RobotMap.ARM_MASTER, CANSparkLowLevel.MotorType.kBrushless);
-        rightMotor = new CANSparkMax(RobotMap.ARM_FOLLOW, CANSparkLowLevel.MotorType.kBrushless);
+        leftMotor = new CANSparkMax(RobotMap.ARM_FOLLOW, CANSparkLowLevel.MotorType.kBrushless);
+        rightMotor = new CANSparkMax(RobotMap.ARM_MASTER, CANSparkLowLevel.MotorType.kBrushless);
 
         leftMotor.restoreFactoryDefaults();
         rightMotor.restoreFactoryDefaults();
@@ -35,11 +36,15 @@ public class Arm extends SubsystemBase {
         lowerSwitch = leftMotor.getReverseLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen);
         lowerSwitch.enableLimitSwitch(true);
 
-        rightMotor.follow(leftMotor, true);
+        leftMotor.follow(rightMotor, true);
 
         pidController = leftMotor.getPIDController();
 
         encoder = new DutyCycleEncoder(RobotMap.ARM_ENCODER);
+
+        absoluteEncoder = rightMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle);
+        absoluteEncoder.setZeroOffset(RobotMap.OFFSET_TO_ZERO);
+        absoluteEncoder.setPositionConversionFactor(360);
     }
 
     public void move(double speed){
@@ -69,5 +74,7 @@ public class Arm extends SubsystemBase {
 
         SmartDashboard.putNumber("Follower Set Velocity", rightMotor.get());
         SmartDashboard.putNumber("Master Set Velocity", leftMotor.get());
+
+        SmartDashboard.putNumber("Absolute Encoder", absoluteEncoder.getPosition());
     }
 }
