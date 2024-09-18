@@ -27,8 +27,8 @@ public class Arm extends SubsystemBase {
         leftMotor.setSmartCurrentLimit(80);
         rightMotor.setSmartCurrentLimit(80);
 
-        leftMotor.setIdleMode(CANSparkBase.IdleMode.kCoast);
-        rightMotor.setIdleMode(CANSparkBase.IdleMode.kCoast);
+        leftMotor.setIdleMode(CANSparkBase.IdleMode.kBrake);
+        rightMotor.setIdleMode(CANSparkBase.IdleMode.kBrake);
 
         upperSwitch = leftMotor.getForwardLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen);
         upperSwitch.enableLimitSwitch(true);
