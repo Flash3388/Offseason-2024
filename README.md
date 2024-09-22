@@ -456,6 +456,51 @@ Implement control code for the Arm based on the PIDF position loop integrated in
 
 There are several approaches to Arm control, and the system itself is quite difficult. Consider your options and try several approaches (all should be based on PIDF). Find the best one and use it. To keep the Arm stable, consider the use of FeedForward (either integrated or external). Consider using Smart motion as well, it might provide a good solution. Which ever option you try, tuning is key for it to function.
 
+
+##### Progress Update: 22.9
+
+Worked on testing Spark PIDF and implementing changes to subsystem and command for PIDF control.
+
+Since the Through-Bore is connected to SparkMax ID 16, this was made the "master" controller with SparkMax ID 15 being the follower. Subsystem now configures and exports PIDF control for commands, with a single default command used to continously control the arm. 
+
+Initial PIDF testing lead to a base calibration of P=0.03, I=0, D=0, F=0. Intrestingly, it works fine for reaching and holding at a position (with 2-degrees error margin), if a bit too violent. This is not a finalized tuning, but allows us to work with the arm for the time being. several things are of note: 
+- the arm is held in place by the P component because it is not strong enough to reach the wanted position, and stalls around 2 degrees from the target. Meaning that the arm is in place and is incapable of moving more. The arm will always be closer to the floor than wanted because of gravity.
+- When moving downwards, gravity accelerates the arm further and causes a violent motion. Dampaning this is required. Adding D or a counter-acting FF will do the trick.
+- To get the arm closer to the setpoint, adding I or FF will be necessary to keep it in place, since P will be neglegible.
+
+Further tuning is wanted, but can wait for a bit in order to progress with integrating the arm with other systems. The arm is operated via a default command in a pattern similar to the one used in the 2024 competition. This design is fine.
+
+Several problems were identified:
+- The ID 16 motor carries a higher load to ID 15 motor. This is a mechanics problem, caused by the chains connected to the motors. Build team was notified and will work on this.
+- Both motors overheat after a few minutes of load, far faster than we would like. Internal motor cleanup was suggested by build team and will be done. Other possible improvements include
+    - keeping the arm at an angle of around 60 will be easier due to less gravitational effect
+    - perhaps a more capable control scheme will help
+- System hardware limit switches are wired to ID 15 motor and do not affect ID 16 motor as it is the master. Build team was notified and will connect switches to motor ID 16.
+
+General checklist of changes:
+- Decreased current limit to 60. This is enough to lift the arm, and its best to keep the limit as low as possible
+- Changed Idle mode to COAST from BRAKE. BRAKE mode prevents safe manipulation of arm during testing, and is possible damaging to the motor when manually moving the arm. Normal arm operations may not require this feature at all, if PID is relied upon.
+- PIDF is configured in Subsystem
+- Subsystem uses the Absolute encoder for position measurement
+- Subsystem uses the Relative encoder for velocity measurement
+- Added command to operate arm with PID as a default command which can switch between set points.
+- Added basic tuning values
+
+Todo wedensday:
+- Add soft limits on both motors. This is a basic replacement to the hardware limit switches and uses the NEO encoder to define forward/reverse limits to the SparkMaxs. Test this in REV Hardware Client and then configure in code.
+    - Due to the need for absolute encoder calibration for the relative encoders, in code, configure the relative encoders according to the absolute encoder positioning and configure soft limits according to that.
+    - These limits will stay even when hard limits are returned as backups
+- Add stop condition to arm command. We don't want to keep the arm in the air for too long. Use a timer which when elapsed, changes the command to a stop mode which stops the motor.
+    -  You may also integrate motor temperature into this instead of (or in additon to) timer. This will allow to stop when motors reach a critical temperature as a safety measure.
+    -  You can either drop the arm completely (by stopping the motor) or move the arm to the floor and then stop.
+- Integrate Arm with other systems. We need to start integrating the arm with the operations of the other systems. This does not mean we are finished with the arm, but we are on a clock and the faster we integrate the faster we will be able to identify problems
+    - after arm-only testing, do a quick go over on the arm code to see if there are things that can be improved.
+    - when everything is fine, open a PR, approve it and merge into master. Move to master, pull and open a new branch.
+    - start integrating the arm with the other systems by using the arm as part of the commands to collect and shoot notes. Since auto-shooting is not a thing yet, use a constant angle.
+
+Todo later:
+- Better tuning for the arm, to improve power consumption, blunt agressive movement
+
 ### Vision
 
 - Assignee: Yahav
