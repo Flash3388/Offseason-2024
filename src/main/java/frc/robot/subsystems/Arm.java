@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
 
 public class Arm extends SubsystemBase {
-    private static final double KP = 0;
+    private static final double KP = 0.03;
     private static final double KI = 0;
     private static final double KD = 0;
     private static final double KF = 0;
@@ -19,6 +19,7 @@ public class Arm extends SubsystemBase {
 
     private final SparkPIDController pidController;
     private final AbsoluteEncoder absoluteEncoder;
+    private final RelativeEncoder relativeEncoder;
 
 
     public Arm() {
@@ -28,11 +29,12 @@ public class Arm extends SubsystemBase {
         followerMotor.restoreFactoryDefaults();
         masterMotor.restoreFactoryDefaults();
 
-        followerMotor.setSmartCurrentLimit(80);
-        masterMotor.setSmartCurrentLimit(80);
+        followerMotor.setSmartCurrentLimit(60);
+        masterMotor.setSmartCurrentLimit(60);
 
-        followerMotor.setIdleMode(CANSparkBase.IdleMode.kBrake);
-        masterMotor.setIdleMode(CANSparkBase.IdleMode.kBrake);
+        followerMotor.setIdleMode(CANSparkBase.IdleMode.kCoast);
+        masterMotor.setIdleMode(CANSparkBase.IdleMode.kCoast);
+        masterMotor.setInverted(true);
 
         upperSwitch = followerMotor.getForwardLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen);
         upperSwitch.enableLimitSwitch(true);
@@ -43,6 +45,8 @@ public class Arm extends SubsystemBase {
 
         absoluteEncoder = masterMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle);
         absoluteEncoder.setPositionConversionFactor(360);
+
+        relativeEncoder = masterMotor.getEncoder();
 
         pidController = masterMotor.getPIDController();
         pidController.setP(KP);
@@ -61,9 +65,15 @@ public class Arm extends SubsystemBase {
     public void stop(){
         masterMotor.stopMotor();
     }
+    public void movePid(double position){
+        pidController.setReference(position, CANSparkBase.ControlType.kPosition);
+    }
 
     public double getArmAngle(){
         return absoluteEncoder.getPosition();
+    }
+    public double getArmVelocity(){
+        return relativeEncoder.getVelocity();
     }
 
     public boolean isAnyLimitSwitchActive(){
@@ -72,7 +82,7 @@ public class Arm extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("Absolute Arm position", getArmAngle());
+        SmartDashboard.putNumber("Arm position", getArmAngle());
         SmartDashboard.putNumber("Arm Master Output", followerMotor.getAppliedOutput());
         SmartDashboard.putNumber("Arm Follower Output", masterMotor.getAppliedOutput());
 
@@ -80,7 +90,5 @@ public class Arm extends SubsystemBase {
 
         SmartDashboard.putNumber("Follower Set Velocity", masterMotor.get());
         SmartDashboard.putNumber("Master Set Velocity", followerMotor.get());
-
-        SmartDashboard.putNumber("Absolute Encoder", absoluteEncoder.getPosition());
     }
 }
