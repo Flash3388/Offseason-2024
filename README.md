@@ -427,6 +427,10 @@ Latest tests show confused detection in forward/backward motion. Forward motion 
 
 The swerve has a tendency to drive to the side during y/x axes motion. Likely caused by swerve configuration and robot chassis weight distribution. fix.
 
+#### Field Oriented-Drive
+
+Using odometery and current alliance, implement a field-oriented drive for the swerve. This drive mode should be the default during the competition but may be replaced with a press of a button to normal drive when wanted.
+
 #### Pathplanner 
 
 Add support for pathplanner use.
@@ -487,9 +491,14 @@ General checklist of changes:
 - Added basic tuning values
 
 Todo wedensday:
+- Delete old arm commands as they are not wanted anymore.
 - Add soft limits on both motors. This is a basic replacement to the hardware limit switches and uses the NEO encoder to define forward/reverse limits to the SparkMaxs. Test this in REV Hardware Client and then configure in code.
     - Due to the need for absolute encoder calibration for the relative encoders, in code, configure the relative encoders according to the absolute encoder positioning and configure soft limits according to that.
     - These limits will stay even when hard limits are returned as backups
+    - Read
+        - [enableSoftLimit](https://codedocs.revrobotics.com/java/com/revrobotics/cansparkbase#enableSoftLimit(com.revrobotics.CANSparkBase.SoftLimitDirection,boolean))
+        - [setSoftLimit](https://codedocs.revrobotics.com/java/com/revrobotics/cansparkbase#setSoftLimit(com.revrobotics.CANSparkBase.SoftLimitDirection,float))
+        - [Example](https://github.com/REVrobotics/SPARK-MAX-Examples/tree/master/Java/Soft%20Limits)
 - Add stop condition to arm command. We don't want to keep the arm in the air for too long. Use a timer which when elapsed, changes the command to a stop mode which stops the motor.
     -  You may also integrate motor temperature into this instead of (or in additon to) timer. This will allow to stop when motors reach a critical temperature as a safety measure.
     -  You can either drop the arm completely (by stopping the motor) or move the arm to the floor and then stop.
