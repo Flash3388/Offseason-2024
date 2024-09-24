@@ -1,10 +1,18 @@
 package frc.robot;
-
+import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import com.pathplanner.lib.commands.FollowPathHolonomic;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -22,6 +30,7 @@ public class Robot extends TimedRobot {
     private Shooter shooter;
     private Intake intake;
     private XboxController xboxController;
+    NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight-banana");
 
     @Override
     public void robotInit() {
@@ -50,6 +59,7 @@ public class Robot extends TimedRobot {
         new JoystickButton(xboxController, XboxController.Button.kX.value)
                 .whileTrue(new IntakeOut(intake));
 
+        robotPoseTargetSpace = LimelightHelpers.getCameraPose_TargetSpace("Limelight-banana");
     }
 
     @Override
@@ -61,6 +71,7 @@ public class Robot extends TimedRobot {
     public void disabledPeriodic() {
 
     }
+    double[] robotPoseTargetSpace;
 
     @Override
     public void teleopInit() {
@@ -116,7 +127,17 @@ public class Robot extends TimedRobot {
     @Override
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
-
+        SmartDashboard.putBoolean("Target-Seen",LimelightHelpers.getTV("Limelight-banana"));
+        SmartDashboard.putNumber("tx", table.getEntry("tx").getDouble(0.0) );
+        SmartDashboard.putNumber("ty",table.getEntry("ty").getDouble(0.0));
+        SmartDashboard.putNumber("distance2",NetworkTableInstance.getDefault().getTable("limelight-banana").getEntry("botpose").getDoubleArray(new double[6])[2]);
+        SmartDashboard.putNumber("distance5",NetworkTableInstance.getDefault().getTable("limelight-banana").getEntry("botpose").getDoubleArray(new double[6])[5]);
+        double distance = Math.sqrt(
+                Math.pow(robotPoseTargetSpace[0],2)+
+                        Math.pow(robotPoseTargetSpace[1],2)+
+                        Math.pow(robotPoseTargetSpace[2],2)
+        );
+        SmartDashboard.putNumber("distancetargetspace", distance);
     }
 
     @Override
