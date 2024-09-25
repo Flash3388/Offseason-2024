@@ -42,7 +42,7 @@ public class ArmPid extends Command {
         }
 
         if(Timer.getFPGATimestamp() > timeLimit){
-            changeTarget(RobotMap.ARM_FLOOR_ANGLE);
+            changeTarget(RobotMap.ARM_ANGLE_BEFORE_STOP);
         }
 
         if(didReachTarget() && position == RobotMap.ARM_FLOOR_ANGLE){

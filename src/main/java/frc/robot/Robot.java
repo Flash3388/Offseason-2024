@@ -22,8 +22,6 @@ public class Robot extends TimedRobot {
 
         xbox = new XboxController(0);
 
-        armPid.changeTarget(60);
-
     }
 
     @Override
