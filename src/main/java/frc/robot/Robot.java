@@ -1,13 +1,10 @@
 package frc.robot;
 
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import frc.robot.commands.ArmMoveDown;
-import frc.robot.commands.ArmMoveUp;
 import frc.robot.commands.ArmPid;
 import frc.robot.subsystems.Arm;
 
@@ -24,9 +21,6 @@ public class Robot extends TimedRobot {
         arm.setDefaultCommand(armPid);
 
         xbox = new XboxController(0);
-
-        new JoystickButton(xbox, XboxController.Button.kX.value).whileTrue(new ArmMoveDown(arm));
-        new JoystickButton(xbox, XboxController.Button.kY.value).whileTrue(new ArmMoveUp(arm));
 
         armPid.changeTarget(60);
 
