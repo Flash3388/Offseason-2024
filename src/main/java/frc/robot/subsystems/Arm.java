@@ -56,6 +56,12 @@ public class Arm extends SubsystemBase {
         pidController.setFF(KF);
         pidController.setFeedbackDevice(absoluteEncoder);
 
+        masterMotor.enableSoftLimit(CANSparkBase.SoftLimitDirection.kForward, true);
+        masterMotor.enableSoftLimit(CANSparkBase.SoftLimitDirection.kReverse, true);
+
+        masterMotor.setSoftLimit(CANSparkBase.SoftLimitDirection.kForward, 123);
+        masterMotor.setSoftLimit(CANSparkBase.SoftLimitDirection.kReverse,  13.3f);
+
     }
 
     public void move(double speed){
