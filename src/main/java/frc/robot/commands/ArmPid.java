@@ -64,10 +64,11 @@ public class ArmPid extends Command {
 
     public void changeTarget(double position) {
         this.timeLimit = Timer.getFPGATimestamp() + TIME_EXTENSION_SEC;
-        this.position = position;
+        if((position < RobotMap.ARM_CEILING_ANGLE && position > RobotMap.ARM_FLOOR_ANGLE) || (position == -1)){
+            this.position = position;
+        }
         this.newPosition = true;
 
-        // todo: have range limit to position
     }
 
     public boolean didReachTarget() {
