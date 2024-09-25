@@ -1,25 +1,31 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.RobotMap;
 import frc.robot.subsystems.Arm;
 
 public class ArmPid extends Command {
     private final Arm arm;
     private double position;
     private boolean newPosition;
+    private static final double TIME_EXTENSION_SEC = 60;   //maybe make it longer
+    private double timeLimit;
+
 
     public ArmPid(Arm arm){
         this.arm = arm;
         this.position = -1;
         this.newPosition = false;
+        this.timeLimit = Timer.getFPGATimestamp() + TIME_EXTENSION_SEC;
 
         addRequirements(arm);
     }
 
     @Override
     public void initialize() {
-
+        this.timeLimit = Timer.getFPGATimestamp() + TIME_EXTENSION_SEC;
     }
 
     @Override
@@ -35,7 +41,15 @@ public class ArmPid extends Command {
             }
         }
 
-        // todo: timer to stop holding arm
+        if(Timer.getFPGATimestamp() > timeLimit){
+            changeTarget(RobotMap.ARM_FLOOR_ANGLE);
+        }
+
+        if(didReachTarget() && position == RobotMap.ARM_FLOOR_ANGLE){
+            changeTarget(-1);
+        }
+
+
     }
 
     @Override
@@ -49,6 +63,7 @@ public class ArmPid extends Command {
     }
 
     public void changeTarget(double position) {
+        this.timeLimit = Timer.getFPGATimestamp() + TIME_EXTENSION_SEC;
         this.position = position;
         this.newPosition = true;
 
