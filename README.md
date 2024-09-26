@@ -510,6 +510,7 @@ Todo wedensday:
 
 Todo later:
 - Better tuning for the arm, to improve power consumption, blunt agressive movement
+- Drop to the floor gently when timer expires or when moving to the floor
 
 ### Vision
 
