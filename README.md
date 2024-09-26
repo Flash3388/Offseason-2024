@@ -491,15 +491,16 @@ General checklist of changes:
 - Added basic tuning values
 
 Todo wedensday:
-- Delete old arm commands as they are not wanted anymore.
-- Add soft limits on both motors. This is a basic replacement to the hardware limit switches and uses the NEO encoder to define forward/reverse limits to the SparkMaxs. Test this in REV Hardware Client and then configure in code.
+- [x] Delete old arm commands as they are not wanted anymore.
+- [x] Add soft limits on both motors. This is a basic replacement to the hardware limit switches and uses the NEO encoder to define forward/reverse limits to the SparkMaxs. Test this in REV Hardware Client and then configure in code.
     - Due to the need for absolute encoder calibration for the relative encoders, in code, configure the relative encoders according to the absolute encoder positioning and configure soft limits according to that.
+        - no true in the end, uses the absolute encoder (for some reason) 
     - These limits will stay even when hard limits are returned as backups
     - Read
         - [enableSoftLimit](https://codedocs.revrobotics.com/java/com/revrobotics/cansparkbase#enableSoftLimit(com.revrobotics.CANSparkBase.SoftLimitDirection,boolean))
         - [setSoftLimit](https://codedocs.revrobotics.com/java/com/revrobotics/cansparkbase#setSoftLimit(com.revrobotics.CANSparkBase.SoftLimitDirection,float))
         - [Example](https://github.com/REVrobotics/SPARK-MAX-Examples/tree/master/Java/Soft%20Limits)
-- Add stop condition to arm command. We don't want to keep the arm in the air for too long. Use a timer which when elapsed, changes the command to a stop mode which stops the motor.
+- [x] Add stop condition to arm command. We don't want to keep the arm in the air for too long. Use a timer which when elapsed, changes the command to a stop mode which stops the motor.
     -  You may also integrate motor temperature into this instead of (or in additon to) timer. This will allow to stop when motors reach a critical temperature as a safety measure.
     -  You can either drop the arm completely (by stopping the motor) or move the arm to the floor and then stop.
 - Integrate Arm with other systems. We need to start integrating the arm with the operations of the other systems. This does not mean we are finished with the arm, but we are on a clock and the faster we integrate the faster we will be able to identify problems
