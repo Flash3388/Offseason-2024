@@ -1,16 +1,22 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.*;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
 
 public class Arm extends SubsystemBase {
+
     private static final double KP = 0.03;
     private static final double KI = 0;
     private static final double KD = 0;
     private static final double KF = 0;
     private static final double IZONE = 0;
+    private static final double TOLERANCE_DEGREES = 3;
+    private static final double TOLERANCE_VELOCITY_RPM = 5;
+
+
     private final CANSparkMax followerMotor;
     private final CANSparkMax masterMotor;
 
@@ -58,27 +64,27 @@ public class Arm extends SubsystemBase {
 
         masterMotor.enableSoftLimit(CANSparkBase.SoftLimitDirection.kForward, true);
         masterMotor.enableSoftLimit(CANSparkBase.SoftLimitDirection.kReverse, true);
-
-        masterMotor.setSoftLimit(CANSparkBase.SoftLimitDirection.kForward, 123);
-        masterMotor.setSoftLimit(CANSparkBase.SoftLimitDirection.kReverse,  13.3f);
-
+        masterMotor.setSoftLimit(CANSparkBase.SoftLimitDirection.kForward, (float) RobotMap.ARM_CEILING_ANGLE);
+        masterMotor.setSoftLimit(CANSparkBase.SoftLimitDirection.kReverse, (float) RobotMap.ARM_FLOOR_ANGLE);
     }
 
     public void move(double speed){
         masterMotor.set(speed);
     }
 
-    public void stop(){
-        masterMotor.stopMotor();
-    }
-    public void movePid(double position){
-        pidController.setReference(position, CANSparkBase.ControlType.kPosition);
+    public void setMoveToPosition(double positionDegrees) {
+        pidController.setReference(positionDegrees, CANSparkBase.ControlType.kPosition);
     }
 
-    public double getArmAngle(){
+    public void stop() {
+        masterMotor.stopMotor();
+    }
+
+    public double getAngleDegrees(){
         return absoluteEncoder.getPosition();
     }
-    public double getArmVelocity(){
+
+    public double getVelocityRpm(){
         return relativeEncoder.getVelocity();
     }
 
@@ -86,15 +92,17 @@ public class Arm extends SubsystemBase {
         return (upperSwitch.isLimitSwitchEnabled() || lowerSwitch.isLimitSwitchEnabled());
     }
 
+    public boolean didReachTarget(double position) {
+        return MathUtil.isNear(position, getAngleDegrees(), TOLERANCE_DEGREES) && Math.abs(getVelocityRpm()) < TOLERANCE_VELOCITY_RPM;
+    }
+
+    public boolean isAtFloor() {
+        return getAngleDegrees() <= RobotMap.ARM_FLOOR_ANGLE && Math.abs(getVelocityRpm()) < TOLERANCE_VELOCITY_RPM;
+    }
+
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("Arm position", getArmAngle());
-        SmartDashboard.putNumber("Arm Master Output", followerMotor.getAppliedOutput());
-        SmartDashboard.putNumber("Arm Follower Output", masterMotor.getAppliedOutput());
-
-        SmartDashboard.putBoolean("Any Switch Active", isAnyLimitSwitchActive());
-
-        SmartDashboard.putNumber("Follower Set Velocity", masterMotor.get());
-        SmartDashboard.putNumber("Master Set Velocity", followerMotor.get());
+        SmartDashboard.putNumber("ArmPosition", getAngleDegrees());
+        SmartDashboard.putBoolean("ArmSwitchActive", isAnyLimitSwitchActive());
     }
 }
