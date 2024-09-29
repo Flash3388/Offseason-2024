@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import com.revrobotics.*;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
@@ -16,7 +17,6 @@ public class Arm extends SubsystemBase {
     private static final double TOLERANCE_DEGREES = 3;
     private static final double TOLERANCE_VELOCITY_RPM = 1;
     private static final int POSITION_PID_SLOT = 0;
-    private static final double ARB_FEEDFORWARD = 0.1;
     private static final double HIGH_CURRENT_TO_WARN = 40;
     private static final double HIGH_TEMPERATURE_TO_WARN = 70;
 
@@ -76,9 +76,18 @@ public class Arm extends SubsystemBase {
     }
 
     public void setMoveToPosition(double positionDegrees) {
+        // filter out noise by just looking at the integer component, this is fine, and we don't need
+        // better precision than this for FF. No point using capable filters.
+        double currentPosition = (int) (getAngleDegrees() - RobotMap.ARM_FLOOR_ANGLE);
+        double arbFeedForward = Math.cos(Math.toRadians(currentPosition)) * 0.1;
+
+        SmartDashboard.putNumber("ArmFFDeg", currentPosition);
+        SmartDashboard.putNumber("ArmArbFF", arbFeedForward);
+
         pidController.setReference(positionDegrees, CANSparkBase.ControlType.kPosition,
                 POSITION_PID_SLOT,
-                ARB_FEEDFORWARD, SparkPIDController.ArbFFUnits.kPercentOut);
+                arbFeedForward,
+                SparkPIDController.ArbFFUnits.kPercentOut);
     }
 
     public void stop() {

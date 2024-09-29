@@ -1,11 +1,10 @@
 package frc.robot.commands;
 
-import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Robot;
 import frc.robot.RobotMap;
 import frc.robot.subsystems.Arm;
 
@@ -13,9 +12,15 @@ public class ArmCommand extends Command {
 
     private static final double MAX_HOLD_ARM_TIME_SEC = 60;
     private static final double POSITION_DROP = -1;
+    private static final double MAX_VELOCITY_RPM = 1000;
+    private static final double MAX_ACCELERATION_RPM_S = 200;
 
     private final Arm arm;
     private final Timer limitTimer;
+    private final TrapezoidProfile.Constraints motionProfileConstraints;
+
+    private TrapezoidProfile motionProfile;
+    private TrapezoidProfile.State motionProfileGoal;
 
     private double position;
     private double newPosition;
@@ -25,6 +30,7 @@ public class ArmCommand extends Command {
     public ArmCommand(Arm arm) {
         this.arm = arm;
         this.limitTimer = new Timer();
+        this.motionProfileConstraints = new TrapezoidProfile.Constraints(MAX_VELOCITY_RPM, MAX_ACCELERATION_RPM_S);
 
         this.position = POSITION_DROP;
         this.newPosition = POSITION_DROP;
@@ -57,13 +63,17 @@ public class ArmCommand extends Command {
             SmartDashboard.putNumber("ArmCommandTimeToLimit", -1);
 
             if (position > 0) {
-                arm.setMoveToPosition(position);
+                motionProfile = new TrapezoidProfile(motionProfileConstraints);
+                motionProfileGoal = new TrapezoidProfile.State(position, 0);
+
                 limitTimer.restart();
 
                 SmartDashboard.putBoolean("ArmCommandControl", true);
             } else {
                 arm.stop();
                 limitTimer.stop();
+
+                motionProfileGoal = null;
 
                 SmartDashboard.putBoolean("ArmCommandControl", false);
             }
@@ -78,6 +88,15 @@ public class ArmCommand extends Command {
             // nothing more to do if we are not moving
             return;
         }
+
+        // todo: ProfiledPIDController takes a different approach, consider it
+        TrapezoidProfile.State current = motionProfile.calculate(
+                limitTimer.get(),
+                new TrapezoidProfile.State(arm.getAngleDegrees(), arm.getVelocityRpm()),
+                motionProfileGoal);
+        SmartDashboard.putNumber("ArmCommandCurrentGoalPos", current.position);
+        SmartDashboard.putNumber("ArmCommandCurrentGoalVel", current.velocity);
+        arm.setMoveToPosition(current.position);
 
         int timeLimitLeft = (int) (MAX_HOLD_ARM_TIME_SEC - limitTimer.get());
         SmartDashboard.putNumber("ArmCommandTimeToLimit", timeLimitLeft);
