@@ -144,6 +144,9 @@ public class SwerveModule {
                 getRotation()
         );
     }
+    public double getDistancePassedMeters(){
+        return driveEncoder.getPosition()* DRIVE_GEAR_RATIO * WHEEL_RADIUS * Math.PI * 2;
+    }
 
     public void resetEncoders() {
         steerEncoder.setPosition(0);

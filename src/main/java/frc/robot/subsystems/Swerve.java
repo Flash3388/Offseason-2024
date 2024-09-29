@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
+import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -28,6 +29,7 @@ public class Swerve extends SubsystemBase {
     private final SwerveDriveKinematics kinematics;
     private final SysIdRoutine sysIdRoutine;
     private final Field2d field;
+    private final DifferentialDrivePoseEstimator m_poseEstimator;
 
     public Swerve(SwerveModule[] swerveModules) {
         sysIdRoutine = new SysIdRoutine(new SysIdRoutine.Config(), new SysIdRoutine.Mechanism(this::volatageDrive, this::sysidLog, this));
@@ -44,6 +46,7 @@ public class Swerve extends SubsystemBase {
         odometry = new SwerveDriveOdometry(kinematics, getHeadingDegrees(), getModulesPosition());
         field = new Field2d();
         SmartDashboard.putData("Field", field);
+        m_poseEstimator = new DifferentialDrivePoseEstimator(getSpeeds(),getHeadingDegrees(), getDistancePassedMeters(),getDistancePassedMeters(), new Pose2d(),)
     }
 
     public Rotation2d getHeadingDegrees(){
@@ -81,7 +84,7 @@ public class Swerve extends SubsystemBase {
     public ChassisSpeeds getSpeeds() {
         return kinematics.toChassisSpeeds(new SwerveDriveKinematics.SwerveDriveWheelStates(getModuleStates()));
     }
-
+ public double getDistancePassedMeters(){return -swerveModules[0].getDistancePassedMeters();}
 
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
         return sysIdRoutine.quasistatic(direction);
