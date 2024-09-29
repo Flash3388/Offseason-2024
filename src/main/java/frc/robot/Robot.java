@@ -9,7 +9,13 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import frc.robot.commands.*;
+import frc.robot.commands.ArmCommand;
+import frc.robot.commands.DriveWithXBox;
+import frc.robot.commands.IntakeIn;
+import frc.robot.commands.IntakeOut;
+import frc.robot.commands.ShooterAMP;
+import frc.robot.commands.ShooterSpeaker;
+import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Climb;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
@@ -21,7 +27,11 @@ public class Robot extends TimedRobot {
     private Climb climb;
     private Shooter shooter;
     private Intake intake;
+    private Arm arm;
+
     private XboxController xboxController;
+
+    private ArmCommand armCommand;
 
     @Override
     public void robotInit() {
@@ -29,8 +39,12 @@ public class Robot extends TimedRobot {
         this.climb = new Climb();
         this.shooter = new Shooter();
         this.intake = new Intake();
+        this.arm = new Arm();
 
         this.xboxController = new XboxController(0);
+
+        armCommand = new ArmCommand(arm);
+        arm.setDefaultCommand(armCommand);
 
         DriveWithXBox driveWithXBox = new DriveWithXBox(swerve, xboxController);
         swerve.setDefaultCommand(driveWithXBox);
@@ -49,7 +63,6 @@ public class Robot extends TimedRobot {
                 .onTrue(new IntakeIn(intake));
         new JoystickButton(xboxController, XboxController.Button.kX.value)
                 .whileTrue(new IntakeOut(intake));
-
     }
 
     @Override

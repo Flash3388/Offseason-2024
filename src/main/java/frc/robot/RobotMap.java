@@ -1,6 +1,13 @@
 package frc.robot;
 
 public class RobotMap {
+
+    public static final int ARM_MASTER = 16;
+    public static final int ARM_FOLLOW = 15;
+    public static final double ARM_FLOOR_ANGLE = 13.3;
+    public static final double ARM_ANGLE_BEFORE_STOP = 15.7;
+    public static final double ARM_CEILING_ANGLE = 123;
+
     public final static double SHOOTER_RIGHT_KP1 = 0.00000175;
     public final static double SHOOTER_RIGHT_KP2 = 0.00018;
     public final static double SHOOTER_LEFT_KP1 = 0.00000178;
@@ -30,11 +37,8 @@ public class RobotMap {
     public static final int SWERVE_LB_STEER_ID = 62;
     public static final int SWERVE_RB_STEER_ID = 32;
     public static final double CHASSIS_RADIUS = 0.63;
-
-
     public static final double DISTANCE_MODULE_TO_CENTER_CHASSIS_METERS = 0.37;
     public static final double MAX_SPEED_SWERVE = 4.4;
-
 
     public static final int CLIMB_MOTOR_ID = 18;
 }
