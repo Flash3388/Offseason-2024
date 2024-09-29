@@ -22,7 +22,7 @@ public class ArmCommand extends Command {
     private boolean hasNewPosition;
     private boolean isInTarget;
 
-    public ArmCommand(Arm arm){
+    public ArmCommand(Arm arm) {
         this.arm = arm;
         this.limitTimer = new Timer();
 
@@ -30,6 +30,11 @@ public class ArmCommand extends Command {
         this.newPosition = POSITION_DROP;
         this.hasNewPosition = false;
         this.isInTarget = false;
+
+        SmartDashboard.putNumber("ArmCommandTarget", position);
+        SmartDashboard.putBoolean("ArmCommandControl", false);
+        SmartDashboard.putBoolean("ArmCommandInTarget", true);
+        SmartDashboard.putNumber("ArmCommandTimeToLimit", -1);
 
         addRequirements(arm);
     }
@@ -47,10 +52,11 @@ public class ArmCommand extends Command {
             isInTarget = false;
 
             position = newPosition;
+
             SmartDashboard.putNumber("ArmCommandTarget", position);
+            SmartDashboard.putNumber("ArmCommandTimeToLimit", -1);
 
             if (position > 0) {
-                // todo: maybe reset iaccum
                 arm.setMoveToPosition(position);
                 limitTimer.restart();
 
@@ -64,8 +70,8 @@ public class ArmCommand extends Command {
         }
 
         isInTarget = position > 0 ?
-                        arm.didReachTarget(position) :
-                        arm.isAtFloor();
+                arm.didReachTarget(position) :
+                arm.isAtFloor();
         SmartDashboard.putBoolean("ArmCommandInTarget", isInTarget);
 
         if (position <= 0) {
@@ -73,14 +79,21 @@ public class ArmCommand extends Command {
             return;
         }
 
-        if (limitTimer.hasElapsed(MAX_HOLD_ARM_TIME_SEC)) {
-            // todo: why not floor?
-            gentlyDrop();
+        int timeLimitLeft = (int) (MAX_HOLD_ARM_TIME_SEC - limitTimer.get());
+        SmartDashboard.putNumber("ArmCommandTimeToLimit", timeLimitLeft);
+
+        if (isInTarget && position <= RobotMap.ARM_ANGLE_BEFORE_STOP) {
+            DriverStation.reportWarning("Arm reached position at or below hold threshold, dropping", false);
+            stopHolding();
+
+            return; // make sure not to reach the following ifs
         }
 
-        if (isInTarget && MathUtil.isNear(position, RobotMap.ARM_FLOOR_ANGLE, 1)) {
-            // isNear because double equality is complex
-            stopHolding();
+        if (timeLimitLeft <= 0) {
+            // todo: beware of limittimer looper. If the timer elapses while trying to set down the arm then
+            //  we'll get a loop of the timer keep trying to set down the arm
+            DriverStation.reportWarning("Arm reached maximum hold time, setting down", false);
+            gentlyDrop();
         }
     }
 

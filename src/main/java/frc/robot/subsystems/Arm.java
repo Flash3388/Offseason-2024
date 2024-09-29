@@ -8,14 +8,17 @@ import frc.robot.RobotMap;
 
 public class Arm extends SubsystemBase {
 
-    private static final double KP = 0.03;
+    private static final double KP = 0.02;
     private static final double KI = 0;
     private static final double KD = 0;
     private static final double KF = 0;
     private static final double IZONE = 0;
     private static final double TOLERANCE_DEGREES = 3;
-    private static final double TOLERANCE_VELOCITY_RPM = 5;
-
+    private static final double TOLERANCE_VELOCITY_RPM = 1;
+    private static final int POSITION_PID_SLOT = 0;
+    private static final double ARB_FEEDFORWARD = 0.1;
+    private static final double HIGH_CURRENT_TO_WARN = 40;
+    private static final double HIGH_TEMPERATURE_TO_WARN = 70;
 
     private final CANSparkMax followerMotor;
     private final CANSparkMax masterMotor;
@@ -55,11 +58,11 @@ public class Arm extends SubsystemBase {
         relativeEncoder = masterMotor.getEncoder();
 
         pidController = masterMotor.getPIDController();
-        pidController.setP(KP);
-        pidController.setI(KI);
-        pidController.setIZone(IZONE);
-        pidController.setD(KD);
-        pidController.setFF(KF);
+        pidController.setP(KP, POSITION_PID_SLOT);
+        pidController.setI(KI, POSITION_PID_SLOT);
+        pidController.setIZone(IZONE, POSITION_PID_SLOT);
+        pidController.setD(KD, POSITION_PID_SLOT);
+        pidController.setFF(KF, POSITION_PID_SLOT);
         pidController.setFeedbackDevice(absoluteEncoder);
 
         masterMotor.enableSoftLimit(CANSparkBase.SoftLimitDirection.kForward, true);
@@ -68,27 +71,29 @@ public class Arm extends SubsystemBase {
         masterMotor.setSoftLimit(CANSparkBase.SoftLimitDirection.kReverse, (float) RobotMap.ARM_FLOOR_ANGLE);
     }
 
-    public void move(double speed){
+    public void move(double speed) {
         masterMotor.set(speed);
     }
 
     public void setMoveToPosition(double positionDegrees) {
-        pidController.setReference(positionDegrees, CANSparkBase.ControlType.kPosition);
+        pidController.setReference(positionDegrees, CANSparkBase.ControlType.kPosition,
+                POSITION_PID_SLOT,
+                ARB_FEEDFORWARD, SparkPIDController.ArbFFUnits.kPercentOut);
     }
 
     public void stop() {
         masterMotor.stopMotor();
     }
 
-    public double getAngleDegrees(){
+    public double getAngleDegrees() {
         return absoluteEncoder.getPosition();
     }
 
-    public double getVelocityRpm(){
+    public double getVelocityRpm() {
         return relativeEncoder.getVelocity();
     }
 
-    public boolean isAnyLimitSwitchActive(){
+    public boolean isAnyLimitSwitchActive() {
         return (upperSwitch.isLimitSwitchEnabled() || lowerSwitch.isLimitSwitchEnabled());
     }
 
@@ -97,12 +102,29 @@ public class Arm extends SubsystemBase {
     }
 
     public boolean isAtFloor() {
-        return getAngleDegrees() <= RobotMap.ARM_FLOOR_ANGLE && Math.abs(getVelocityRpm()) < TOLERANCE_VELOCITY_RPM;
+        // add +1 to angle to give it a margin of +1 degrees
+        return getAngleDegrees() <= RobotMap.ARM_FLOOR_ANGLE + 1 && Math.abs(getVelocityRpm()) < TOLERANCE_VELOCITY_RPM;
     }
 
     @Override
     public void periodic() {
+        double currentMaster = Math.abs(masterMotor.getOutputCurrent());
+        double currentFollower = Math.abs(followerMotor.getOutputCurrent());
+
+        double tempMaster = masterMotor.getMotorTemperature();
+        double tempFollower = followerMotor.getMotorTemperature();
+
+        SmartDashboard.putNumber("ArmMasterCurrent", currentMaster);
+        SmartDashboard.putNumber("ArmFollowerCurrent", currentFollower);
+        SmartDashboard.putNumber("ArmMasterTemp", tempMaster);
+        SmartDashboard.putNumber("ArmFollowerTemp", tempFollower);
         SmartDashboard.putNumber("ArmPosition", getAngleDegrees());
         SmartDashboard.putBoolean("ArmSwitchActive", isAnyLimitSwitchActive());
+
+        boolean shouldWarnCurrent = currentFollower > HIGH_CURRENT_TO_WARN || currentMaster > HIGH_CURRENT_TO_WARN;
+        SmartDashboard.putBoolean("ArmHighMotorCurrent", shouldWarnCurrent);
+
+        boolean shouldWarnTemp = tempMaster > HIGH_TEMPERATURE_TO_WARN || tempFollower > HIGH_TEMPERATURE_TO_WARN;
+        SmartDashboard.putBoolean("ArmHighMotorTemp", shouldWarnTemp);
     }
 }
