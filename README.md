@@ -512,6 +512,38 @@ Todo later:
 - Better tuning for the arm, to improve power consumption, blunt agressive movement
 - Drop to the floor gently when timer expires or when moving to the floor
 
+##### Progress Update: 30.9
+
+Took an opportunity to test the arm against several approaches and tunings. 
+- The position control in SparkMax is pretty good on its own.
+    - It's a bit violent going up and stopping suddently when reaching the setpoint
+    - It's very violent going down, as gravity increases the power suggnificantly
+    - Normally the arm raises it can reach up to around 1200 RPM speed
+    - When going down it can reach around 1500-2000 RPM
+    - This speed causes the arm to slam down with force
+    - This violent motion is damaging to the arm
+- Attempted to blunt this speed with several approaches
+    - adding some `kd` didn't have much affect, and too much `kd` causes oscillations due to sensor noise
+    - adding an arbitrary FF has the affect of increasing power for raising and decreases power for lowering
+        - however, we cannot raise this value to high as it will prevent capable raising
+        - up to a limit, it did had an affect, but not enough
+    - Using an FF based on a $cos(angle)$ function
+        - Unlike arbitrary FF, this has a changing FF value, which causes a nicer motion
+        - It also add the affect of providing better percision, because it provided more power to the motor
+        - But because it is not constant, then it doesn't alter the output too much such that it misses
+        - Additionally, because of a lower P need and limited FF value, the current drawn by the motor during stall is lower on average. This can be attributed to what the actual output voltage is.
+     - Using SmartMotion is problematic..... This was known in advance though
+        - SmartMotion combines motion profiling with the PIDF loop for position control
+        - HOWEVER, it was weirdly implemented via a velocity loop instead
+        - This makes tuning for an arm difficult, and very dangerous for our specific arm
+        - It showed good properties, since the velocity was very controlled and allowed us to limit it
+        - But tuning this is difficult
+
+The conclusion here is to combine the best of what we have:
+- use the Position control with SparkMax at the base
+- Add cosine based FF
+- Add motion profiling for velocity control
+
 ### Vision
 
 - Assignee: Yahav
