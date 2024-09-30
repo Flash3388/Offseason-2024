@@ -138,6 +138,7 @@ public class Robot extends TimedRobot {
                         Math.pow(robotPoseTargetSpace[2],2)
         );
         SmartDashboard.putNumber("distancetargetspace", distance);
+        this.swerve.updatePoseEstimator(); // where to put poseEstimation
     }
 
     @Override

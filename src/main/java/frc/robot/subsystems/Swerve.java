@@ -29,7 +29,8 @@ public class Swerve extends SubsystemBase {
     private final SwerveDriveKinematics kinematics;
     private final SysIdRoutine sysIdRoutine;
     private final Field2d field;
-    private final DifferentialDrivePoseEstimator m_poseEstimator;
+    private final DifferentialDrivePoseEstimator s_poseEstimator;
+    private final DifferentialDriveKinematics s_kinematics;
 
     public Swerve(SwerveModule[] swerveModules) {
         sysIdRoutine = new SysIdRoutine(new SysIdRoutine.Config(), new SysIdRoutine.Mechanism(this::volatageDrive, this::sysidLog, this));
@@ -46,7 +47,8 @@ public class Swerve extends SubsystemBase {
         odometry = new SwerveDriveOdometry(kinematics, getHeadingDegrees(), getModulesPosition());
         field = new Field2d();
         SmartDashboard.putData("Field", field);
-        m_poseEstimator = new DifferentialDrivePoseEstimator(getSpeeds(),getHeadingDegrees(), getDistancePassedMeters(),getDistancePassedMeters(), new Pose2d(),)
+        s_kinematics = new DifferentialDriveKinematics(RobotMap.DISTANCE_MODULE_TO_CENTER_CHASSIS_METERS*2); // check if true!
+        s_poseEstimator = new DifferentialDrivePoseEstimator(s_kinematics,getHeadingDegrees(), getDistancePassedMetersLeft(),getDistancePassedMetersRight(), new Pose2d());
     }
 
     public Rotation2d getHeadingDegrees(){
@@ -84,7 +86,9 @@ public class Swerve extends SubsystemBase {
     public ChassisSpeeds getSpeeds() {
         return kinematics.toChassisSpeeds(new SwerveDriveKinematics.SwerveDriveWheelStates(getModuleStates()));
     }
- public double getDistancePassedMeters(){return -swerveModules[0].getDistancePassedMeters();}
+    public double getDistancePassedMetersLeft(){return ((-swerveModules[0].getDistancePassedMeters()+(-swerveModules[2].getDistancePassedMeters())/2));}
+    public double getDistancePassedMetersRight(){return ((-swerveModules[1].getDistancePassedMeters()+(-swerveModules[3].getDistancePassedMeters())/2));}
+    public Pose2d updatePoseEstimator(){return this.s_poseEstimator.update(getHeadingDegrees(), getDistancePassedMetersLeft(), getDistancePassedMetersRight());}
 
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
         return sysIdRoutine.quasistatic(direction);
