@@ -10,13 +10,13 @@ import frc.robot.subsystems.Shooter;
 import java.sql.Time;
 
 public class ShooterAMP extends Command {
+    //Are we supposed to delete those comments?
     private final Shooter shooter;
     private final double speed;
     private final Intake intake;
     private final Timer timer;
     //private final Timer fullRunTimer;
-
-    private boolean timerStarted;
+    //private boolean timerStarted;
 
     public ShooterAMP(Shooter shooter, Intake intake) {
         this.shooter = shooter;

@@ -14,8 +14,6 @@ public class Shooter extends SubsystemBase {
     private RelativeEncoder encoderLeft;
     private SparkPIDController pidControllerRight;
     private SparkPIDController pidControllerLeft;
-    public static double SPEAKER_SPEED_RPM = 4000;
-    public static double AMP_SPEED_RPM = 2000;
     public static double TOLERANCE = 150;
     private static double KF = 0.000185;
 
@@ -76,14 +74,6 @@ public class Shooter extends SubsystemBase {
         return encoderLeft.getVelocity();
     }
 
-    public boolean isAtRPMRight(double RPM) {
-        return MathUtil.isNear(RPM, encoderRight.getVelocity(), TOLERANCE);
-    }
-
-    public boolean isAtRPMLeft(double RPM) {
-        return MathUtil.isNear(RPM, encoderLeft.getVelocity(), TOLERANCE);
-    }
-
 
     public void resetPid() {
         pidControllerRight.setIAccum(0);
@@ -97,17 +87,11 @@ public class Shooter extends SubsystemBase {
     }
 
     public boolean isAtRangePIDRight(double speed) {
-        if (getVelocityRight() <= speed + 150 && getVelocityRight() >= speed - 150) {
-            return true;
-        }
-        return false;
+        return (getVelocityRight() <= speed + TOLERANCE && getVelocityRight() >= speed - TOLERANCE);
     }
 
     public boolean isAtRangePIDLeft(double speed) {
-        if (getVelocityLeft() <= speed + 150 && getVelocityLeft() >= speed - 150) {
-            return true;
-        }
-        return false;
+        return (getVelocityLeft() <= speed + TOLERANCE && getVelocityLeft() >= speed - TOLERANCE);
     }
 
     public boolean isAtRangePID(double speed){

@@ -11,13 +11,11 @@ public class ForwardNote extends Command {
     private Shooter shooter;
     private Intake intake;
     private double speed;
-    private boolean isSpeaker;
     private Timer timer;
 
     public ForwardNote(Shooter shooter, Intake intake, boolean isSpeaker) {
         this.shooter = shooter;
         this.intake = intake;
-        this.isSpeaker = isSpeaker;
         if(isSpeaker){
             speed = RobotMap.SHOOTER_SPEED_SPEAKER;
         }
