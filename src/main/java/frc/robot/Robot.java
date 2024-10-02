@@ -55,9 +55,9 @@ public class Robot extends TimedRobot {
                 .onTrue(new UpAndDown(climb, false));
         */
         new JoystickButton(xboxController, XboxController.Button.kB.value)
-                .onTrue(new ShooterAMP(shooter, RobotMap.SHOOTER_SPEED_AMP, intake));
+                .onTrue(new ShooterAMP(shooter, intake));
         new JoystickButton(xboxController, XboxController.Button.kA.value)
-                .onTrue(new ShooterSpeaker(shooter, RobotMap.SHOOTER_SPEED_SPEAKER, intake));
+                .onTrue(new ShooterSpeaker(shooter, intake));
 
         new JoystickButton(xboxController, XboxController.Button.kY.value)
                 .onTrue(new IntakeIn(intake));
