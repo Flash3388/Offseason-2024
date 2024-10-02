@@ -109,4 +109,8 @@ public class Shooter extends SubsystemBase {
         }
         return false;
     }
+
+    public boolean isAtRangePID(double speed){
+        return isAtRangePIDLeft(speed) && isAtRangePIDRight(speed);
+    }
 }
