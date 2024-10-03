@@ -1,4 +1,5 @@
 package frc.robot;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -21,6 +22,7 @@ public class Robot extends TimedRobot {
     private Shooter shooter;
     private Intake intake;
     private XboxController xboxController;
+    private LimelightHelpers limelightHelper;
     NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight-banana");
 
     @Override
@@ -51,6 +53,7 @@ public class Robot extends TimedRobot {
                 .whileTrue(new IntakeOut(intake));
 
         robotPoseTargetSpace = LimelightHelpers.getCameraPose_TargetSpace("Limelight-banana");
+
     }
 
     @Override
@@ -129,7 +132,8 @@ public class Robot extends TimedRobot {
                         Math.pow(robotPoseTargetSpace[2],2)
         );
         SmartDashboard.putNumber("distancetargetspace", distance);
-        if(LimelightHelpers.LimelightResults("botpose").getBotPose2d)
+        LimelightHelpers.getBotPose2d_wpiBlue("Limelight-banana");
+        LimelightHelpers.getBotPose2d_wpiRed("Limelight-banana");
         this.swerve.updatePoseEstimator(); // where to put poseEstimation
     }
 
