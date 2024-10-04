@@ -60,8 +60,7 @@ public class SwerveModule {
 
         this.printName = String.format("SwerveModule[%s]", identifier);
 
-        this.drive.restoreFactoryDefaults();
-        this.steer.restoreFactoryDefaults();
+        //drive.setSmartCurrentLimit(40);
 
         this.driveEncoder = this.drive.getEncoder();
         this.steerEncoder = this.steer.getEncoder();
@@ -152,7 +151,7 @@ public class SwerveModule {
 
     public void setDesiredState(SwerveModuleState desiredState) {
         SwerveModuleState state = SwerveModuleState.optimize(desiredState, getRotation());
-        setDriveVelocity(-state.speedMetersPerSecond);
+        setDriveVelocity(state.speedMetersPerSecond);
         setSteerPosition(state.angle.getDegrees());
     }
 
