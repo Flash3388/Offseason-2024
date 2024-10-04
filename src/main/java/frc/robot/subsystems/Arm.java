@@ -40,8 +40,6 @@ public class Arm extends SubsystemBase {
         followerMotor.setSmartCurrentLimit(60);
         masterMotor.setSmartCurrentLimit(60);
 
-        followerMotor.setIdleMode(CANSparkBase.IdleMode.kCoast);
-        masterMotor.setIdleMode(CANSparkBase.IdleMode.kCoast);
         masterMotor.setInverted(true);
 
         upperSwitch = followerMotor.getForwardLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen);
@@ -68,6 +66,8 @@ public class Arm extends SubsystemBase {
         masterMotor.enableSoftLimit(CANSparkBase.SoftLimitDirection.kReverse, true);
         masterMotor.setSoftLimit(CANSparkBase.SoftLimitDirection.kForward, (float) RobotMap.ARM_CEILING_ANGLE);
         masterMotor.setSoftLimit(CANSparkBase.SoftLimitDirection.kReverse, (float) RobotMap.ARM_FLOOR_ANGLE);
+
+        exitBrake();
     }
 
     public void move(double speed) {
@@ -112,6 +112,16 @@ public class Arm extends SubsystemBase {
     public boolean isAtFloor() {
         // add +1 to angle to give it a margin of +1 degrees
         return getAngleDegrees() <= RobotMap.ARM_FLOOR_ANGLE + 1 && Math.abs(getVelocityRpm()) < TOLERANCE_VELOCITY_RPM;
+    }
+
+    public void enterBrake() {
+        masterMotor.setIdleMode(CANSparkBase.IdleMode.kBrake);
+        followerMotor.setIdleMode(CANSparkBase.IdleMode.kBrake);
+    }
+
+    public void exitBrake() {
+        masterMotor.setIdleMode(CANSparkBase.IdleMode.kCoast);
+        followerMotor.setIdleMode(CANSparkBase.IdleMode.kCoast);
     }
 
     @Override

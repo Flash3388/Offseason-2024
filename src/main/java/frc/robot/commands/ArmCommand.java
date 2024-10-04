@@ -49,6 +49,7 @@ public class ArmCommand extends Command {
         SmartDashboard.putBoolean("ArmCommandControl", false);
         SmartDashboard.putBoolean("ArmCommandInTarget", true);
         SmartDashboard.putNumber("ArmCommandTimeToLimit", -1);
+        SmartDashboard.putNumber("ArmCommandProfileSP", -1);
         SmartDashboard.putBoolean("ArmCommandProfileFinished", false);
 
         addRequirements(arm);
@@ -103,6 +104,7 @@ public class ArmCommand extends Command {
 
         if (!motionProfileFinished) {
             motionProfileSetPoint = motionProfile.calculate(0.02, motionProfileSetPoint, motionProfileGoal);
+            SmartDashboard.putNumber("ArmCommandProfileSP", motionProfileSetPoint.position);
             arm.setMoveToPosition(motionProfileSetPoint.position);
 
             if (isInTarget) {
