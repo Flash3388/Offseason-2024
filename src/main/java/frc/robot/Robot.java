@@ -120,6 +120,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
+        this.swerve.updatePoseEstimator();
         CommandScheduler.getInstance().run();
         SmartDashboard.putBoolean("Target-Seen",LimelightHelpers.getTV("Limelight-banana"));
         SmartDashboard.putNumber("tx", table.getEntry("tx").getDouble(0.0) );
@@ -132,9 +133,6 @@ public class Robot extends TimedRobot {
                         Math.pow(robotPoseTargetSpace[2],2)
         );
         SmartDashboard.putNumber("distancetargetspace", distance);
-        LimelightHelpers.getBotPose2d_wpiBlue("Limelight-banana");
-        LimelightHelpers.getBotPose2d_wpiRed("Limelight-banana");
-        this.swerve.updatePoseEstimator(); // where to put poseEstimation
     }
 
     @Override

@@ -89,7 +89,10 @@ public class Swerve extends SubsystemBase {
     }
     public double getDistancePassedMetersLeft(){return ((-swerveModules[0].getDistancePassedMeters()+(-swerveModules[2].getDistancePassedMeters())/2));}
     public double getDistancePassedMetersRight(){return ((-swerveModules[1].getDistancePassedMeters()+(-swerveModules[3].getDistancePassedMeters())/2));}
-    public Pose2d updatePoseEstimator(){return this.s_diffrenetialDrivePoseEstimator.update(getHeadingDegrees(), getDistancePassedMetersLeft(), getDistancePassedMetersRight());}
+    public void updatePoseEstimator(){
+        if(LimelightHelpers.getTV("limelight-banana")){this.field.setRobotPose(LimelightHelpers.getBotPose2d_wpiBlue("limelight-banana"));}
+       else{this.field.setRobotPose(this.s_diffrenetialDrivePoseEstimator.update(getHeadingDegrees(), getDistancePassedMetersLeft(), getDistancePassedMetersRight()));}
+    }
 
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
         return sysIdRoutine.quasistatic(direction);
