@@ -45,7 +45,7 @@ public class Robot extends TimedRobot {
         arm.setDefaultCommand(armCommand);
 
         DriveWithXBox driveWithXBox = new DriveWithXBox(swerve, xboxController);
-        swerve.setDefaultCommand(driveWithXBox);
+        //swerve.setDefaultCommand(driveWithXBox);
 
        /*new JoystickButton(xboxController, XboxController.Button.kA.value)
                 .onTrue(new UpAndDown(climb, true));
