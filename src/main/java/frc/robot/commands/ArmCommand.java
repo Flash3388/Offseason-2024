@@ -41,6 +41,9 @@ public class ArmCommand extends Command {
         SmartDashboard.putBoolean("ArmCommandControl", false);
         SmartDashboard.putBoolean("ArmCommandInTarget", true);
         SmartDashboard.putNumber("ArmCommandTimeToLimit", -1);
+        SmartDashboard.putNumber("ArmCommandCurrentGoalPos", 0);
+        SmartDashboard.putNumber("ArmCommandCurrentGoalVel", 0);
+        SmartDashboard.putBoolean("ArmCommandProfileFinished", false);
 
         addRequirements(arm);
     }
@@ -89,16 +92,23 @@ public class ArmCommand extends Command {
             return;
         }
 
-        // todo: ProfiledPIDController takes a different approach, consider it
-        TrapezoidProfile.State current = motionProfile.calculate(
-                limitTimer.get(),
-                new TrapezoidProfile.State(arm.getAngleDegrees(), arm.getVelocityRpm()),
-                motionProfileGoal);
-        SmartDashboard.putNumber("ArmCommandCurrentGoalPos", current.position);
-        SmartDashboard.putNumber("ArmCommandCurrentGoalVel", current.velocity);
-        arm.setMoveToPosition(current.position);
+        double currentTime = limitTimer.get();
+        if (!motionProfile.isFinished(currentTime)) {
+            // todo: ProfiledPIDController takes a different approach, consider it
+            TrapezoidProfile.State current = motionProfile.calculate(
+                    currentTime,
+                    new TrapezoidProfile.State(arm.getAngleDegrees(), arm.getVelocityRpm()),
+                    motionProfileGoal);
+            SmartDashboard.putNumber("ArmCommandCurrentGoalPos", current.position);
+            SmartDashboard.putNumber("ArmCommandCurrentGoalVel", current.velocity);
+            SmartDashboard.putBoolean("ArmCommandProfileFinished", false);
+            arm.setMoveToPosition(current.position);
+        } else {
+            SmartDashboard.putBoolean("ArmCommandProfileFinished", true);
+            arm.setMoveToPosition(position);
+        }
 
-        int timeLimitLeft = (int) (MAX_HOLD_ARM_TIME_SEC - limitTimer.get());
+        int timeLimitLeft = (int) (MAX_HOLD_ARM_TIME_SEC - currentTime);
         SmartDashboard.putNumber("ArmCommandTimeToLimit", timeLimitLeft);
 
         if (isInTarget && position <= RobotMap.ARM_ANGLE_BEFORE_STOP) {

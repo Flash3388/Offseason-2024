@@ -128,6 +128,7 @@ public class Arm extends SubsystemBase {
         SmartDashboard.putNumber("ArmMasterTemp", tempMaster);
         SmartDashboard.putNumber("ArmFollowerTemp", tempFollower);
         SmartDashboard.putNumber("ArmPosition", getAngleDegrees());
+        SmartDashboard.putNumber("ArmVelocityRpm", getVelocityRpm());
         SmartDashboard.putBoolean("ArmSwitchActive", isAnyLimitSwitchActive());
 
         boolean shouldWarnCurrent = currentFollower > HIGH_CURRENT_TO_WARN || currentMaster > HIGH_CURRENT_TO_WARN;
