@@ -7,6 +7,8 @@ public class RobotMap {
     public static final double ARM_FLOOR_ANGLE = 13.3;
     public static final double ARM_ANGLE_BEFORE_STOP = 15.7;
     public static final double ARM_CEILING_ANGLE = 123;
+    public static final double ARM_AMP_ANGLE = 100;
+    public static final double ARM_SPEAKER_ANGLE = 30;
 
     public final static double SHOOTER_RIGHT_KP1 = 0.00000175;
     public final static double SHOOTER_RIGHT_KP2 = 0.00018;

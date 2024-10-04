@@ -11,8 +11,17 @@ import com.revrobotics.CANSparkLowLevel;
 import com.revrobotics.CANSparkMax;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.commands.*;
+import frc.robot.subsystems.Arm;
+import frc.robot.subsystems.Climb;
+import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.Swerve;
 import frc.robot.commands.ArmCommand;
 import frc.robot.commands.DriveWithXBox;
 import frc.robot.commands.IntakeIn;
@@ -53,15 +62,12 @@ public class Robot extends TimedRobot {
         new JoystickButton(xboxController, XboxController.Button.kB.value)
                 .onTrue(new UpAndDown(climb, false));
         */
-        new JoystickButton(xboxController, XboxController.Button.kB.value)
-                .onTrue(new ShooterAMP(shooter, RobotMap.SHOOTER_SPEED_AMP, intake));
-        new JoystickButton(xboxController, XboxController.Button.kA.value)
-                .onTrue(new ShooterSpeaker(shooter, RobotMap.SHOOTER_SPEED_SPEAKER, intake));
 
-        new JoystickButton(xboxController, XboxController.Button.kY.value)
-                .onTrue(new IntakeIn(intake));
+        new JoystickButton(xboxController, XboxController.Button.kY.value).onTrue(shooterAMP());
+        new JoystickButton(xboxController,XboxController.Button.kB.value).onTrue(shooterSpeaker());
         new JoystickButton(xboxController, XboxController.Button.kX.value)
                 .whileTrue(new IntakeOut(intake));
+        new JoystickButton(xboxController, XboxController.Button.kA.value).onTrue(collectFromFloor());
     }
 
     @Override
@@ -135,4 +141,24 @@ public class Robot extends TimedRobot {
 
     }
 
+    private Command shooterAMP(){
+        return new ParallelCommandGroup(
+                Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_AMP_ANGLE)),
+                new ShooterAMP(shooter, intake),
+                new ForwardNote(shooter, intake, false));
+    }
+
+    private Command shooterSpeaker(){
+        return new ParallelCommandGroup(
+                Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_SPEAKER_ANGLE)),
+                new ShooterSpeaker(shooter, intake),
+                new ForwardNote(shooter, intake, true));
+    }
+
+    private Command collectFromFloor(){
+        return new ParallelCommandGroup(
+                Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_ANGLE_BEFORE_STOP)),
+                new IntakeIn(intake));
+
+    }
 }

@@ -6,35 +6,43 @@ import frc.robot.RobotMap;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 
-public class ShooterSpeaker extends Command {
+public class ForwardNote extends Command {
+
     private Shooter shooter;
-    private double speed;
     private Intake intake;
+    private double speed;
     private Timer timer;
 
-    public ShooterSpeaker(Shooter shooter, Intake intake) {
+    public ForwardNote(Shooter shooter, Intake intake, boolean isSpeaker) {
         this.shooter = shooter;
-        this.speed = RobotMap.SHOOTER_SPEED_SPEAKER;
         this.intake = intake;
+        if(isSpeaker){
+            speed = RobotMap.SHOOTER_SPEED_SPEAKER;
+        }
+        else{
+            speed = RobotMap.SHOOTER_SPEED_AMP;
+        }
         this.timer = new Timer();
-        addRequirements(shooter);
+
+        addRequirements(intake);
     }
 
     @Override
     public void initialize() {
-        shooter.resetPid();
         timer.reset();
         timer.start();
     }
 
     @Override
     public void execute() {
-        shooter.movePid(speed);
+        if (shooter.isAtRangePID(speed)) {
+            intake.in();
+        }
     }
 
     @Override
     public void end(boolean interrupted) {
-        shooter.stop();
+        intake.stop();
         timer.stop();
     }
 
