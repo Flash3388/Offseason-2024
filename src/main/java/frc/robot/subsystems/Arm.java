@@ -30,7 +30,6 @@ public class Arm extends SubsystemBase {
     private final AbsoluteEncoder absoluteEncoder;
     private final RelativeEncoder relativeEncoder;
 
-
     public Arm() {
         followerMotor = new CANSparkMax(RobotMap.ARM_FOLLOW, CANSparkLowLevel.MotorType.kBrushless);
         masterMotor = new CANSparkMax(RobotMap.ARM_MASTER, CANSparkLowLevel.MotorType.kBrushless);
