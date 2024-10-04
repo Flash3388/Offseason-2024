@@ -60,7 +60,7 @@ public class SwerveModule {
 
         this.printName = String.format("SwerveModule[%s]", identifier);
 
-        //drive.setSmartCurrentLimit(40);
+        drive.setSmartCurrentLimit(20, 20);
 
         this.driveEncoder = this.drive.getEncoder();
         this.steerEncoder = this.steer.getEncoder();
