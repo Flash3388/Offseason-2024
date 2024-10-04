@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -16,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.RobotMap;
+import frc.robot.TargetInfo;
 
 import static edu.wpi.first.units.Units.Meters;
 
@@ -44,6 +46,12 @@ public class Swerve extends SubsystemBase {
         odometry = new SwerveDriveOdometry(kinematics, getHeadingDegrees(), getModulesPosition());
         field = new Field2d();
         SmartDashboard.putData("Field", field);
+
+
+    }
+
+    public Field2d getField() {
+        return field;
     }
 
     public Rotation2d getHeadingDegrees(){
@@ -144,6 +152,22 @@ public class Swerve extends SubsystemBase {
         for (int i = 0; i < 4; i++) {
             swerveModules[i].stop();
         }
+    }
+
+    public TargetInfo getTargetInfoFromCurrentPos(Pose2d other) {
+        Pose2d pose = odometry.getPoseMeters();
+        return getTargetInfo(pose, other);
+    }
+
+    public TargetInfo getTargetInfo(Pose2d robot, Pose2d other) {
+        double x = robot.getX() - other.getX();
+        double y = robot.getY() - other.getY();
+
+        double distance = Math.sqrt(Math.pow(x,2) + Math.pow(y,2));
+        double angle = Math.toDegrees(Math.atan2(y, x));
+        angle += 180;
+
+        return new TargetInfo(distance, angle);
     }
 
     @Override

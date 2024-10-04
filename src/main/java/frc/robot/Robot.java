@@ -5,19 +5,18 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.*;
-import frc.robot.subsystems.Arm;
-import frc.robot.subsystems.Climb;
-import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.Shooter;
-import frc.robot.subsystems.Swerve;
+import frc.robot.subsystems.*;
+
+import java.util.Collections;
 
 public class Robot extends TimedRobot {
 
@@ -53,11 +52,23 @@ public class Robot extends TimedRobot {
                 .onTrue(new UpAndDown(climb, false));
         */
 
+        Pose2d fakeTarget = new Pose2d(0, 2, Rotation2d.fromDegrees(180));
+        swerve.getField().getObject("target").setPose(fakeTarget);
+
         new JoystickButton(xboxController, XboxController.Button.kY.value).onTrue(shooterAMP());
         new JoystickButton(xboxController,XboxController.Button.kB.value).onTrue(shooterSpeaker());
         new JoystickButton(xboxController, XboxController.Button.kX.value)
                 .whileTrue(new IntakeOut(intake));
         new JoystickButton(xboxController, XboxController.Button.kA.value).onTrue(collectFromFloor());
+
+
+        new JoystickButton(xboxController, XboxController.Button.kStart.value).onTrue(new DeferredCommand(()-> {
+            TargetInfo targetInfo = swerve.getTargetInfoFromCurrentPos(fakeTarget);
+            SmartDashboard.putNumber("FakeTargetStart", swerve.getHeadingDegrees().getDegrees());
+            SmartDashboard.putNumber("FakeTargetAngle", targetInfo.getAngle());
+            return new RotateToAngle(swerve, targetInfo.getAngle());
+        }, Collections.emptySet()));
+
     }
 
     @Override
@@ -113,18 +124,15 @@ public class Robot extends TimedRobot {
 
     @Override
     public void testInit() {
-
     }
 
     @Override
     public void testPeriodic() {
-
     }
 
     @Override
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
-
     }
 
     @Override
