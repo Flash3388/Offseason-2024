@@ -1,5 +1,8 @@
 package frc.robot;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -15,6 +18,8 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 
+import java.util.Optional;
+
 public class Robot extends TimedRobot {
 
     private Swerve swerve;
@@ -23,6 +28,7 @@ public class Robot extends TimedRobot {
     private Intake intake;
     private XboxController xboxController;
     private LimelightHelpers limelightHelper;
+    private AprilTagFieldLayout layout;
     NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight-banana");
 
     @Override
@@ -53,7 +59,7 @@ public class Robot extends TimedRobot {
                 .whileTrue(new IntakeOut(intake));
 
         robotPoseTargetSpace = LimelightHelpers.getCameraPose_TargetSpace("Limelight-banana");
-
+        layout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
     }
 
     @Override
@@ -74,7 +80,21 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopPeriodic() {
+        int id;       //if needed is the id target-for example speaker id of blue alliance is 7
+        if(LimelightHelpers.getTV("limelight-banana")){
+             id = (int) LimelightHelpers.getFiducialID("limelight-banana");
 
+            Optional<Pose3d> tagPoseOptional = layout.getTagPose(id);
+            if(tagPoseOptional.isEmpty()){                    //not found
+                return;
+            }
+            Pose3d tagPose = tagPoseOptional.get(); //if didn't check would crash
+            Pose2d robotPose = swerve.getRobotPose();
+            double distance = Math.sqrt(
+                    Math.pow(tagPose.getX()-robotPose.getX(),2)
+                            +Math.pow(tagPose.getY()-robotPose.getY(),2));
+            SmartDashboard.putNumber("distance with id", distance);
+        }
     }
 
     @Override
