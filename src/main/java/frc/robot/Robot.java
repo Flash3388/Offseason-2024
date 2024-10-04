@@ -118,23 +118,14 @@ public class Robot extends TimedRobot {
 
     }
 
-    double pos;
-
     @Override
     public void testInit() {
-        pos = 0;
-        SmartDashboard.putNumber("armpos", 0);
-        SmartDashboard.putBoolean("armcon", false);
+
     }
 
     @Override
     public void testPeriodic() {
-        double p = SmartDashboard.getNumber("armpos", 0);
-        boolean a = SmartDashboard.getBoolean("armcon", false);
-        if (a && p != pos && p > 0) {
-            pos = p;
-            armCommand.changeTarget(pos);
-        }
+
     }
 
     @Override
