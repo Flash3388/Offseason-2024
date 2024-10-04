@@ -1,11 +1,12 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Robot;
 import frc.robot.RobotMap;
 import frc.robot.subsystems.Arm;
 
@@ -13,9 +14,17 @@ public class ArmCommand extends Command {
 
     private static final double MAX_HOLD_ARM_TIME_SEC = 60;
     private static final double POSITION_DROP = -1;
+    private static final double MAX_VELOCITY_RPM = 1000;
+    private static final double MAX_ACCELERATION_RPM_S = 200;
 
     private final Arm arm;
     private final Timer limitTimer;
+    private final TrapezoidProfile.Constraints motionProfileConstraints;
+
+    private TrapezoidProfile motionProfile;
+    private TrapezoidProfile.State motionProfileGoal;
+    private TrapezoidProfile.State motionProfileSetPoint;
+    private boolean motionProfileFinished;
 
     private double position;
     private double newPosition;
@@ -25,16 +34,22 @@ public class ArmCommand extends Command {
     public ArmCommand(Arm arm) {
         this.arm = arm;
         this.limitTimer = new Timer();
+        this.motionProfileConstraints = new TrapezoidProfile.Constraints(MAX_VELOCITY_RPM, MAX_ACCELERATION_RPM_S);
 
         this.position = POSITION_DROP;
         this.newPosition = POSITION_DROP;
         this.hasNewPosition = false;
         this.isInTarget = false;
 
+        this.motionProfileGoal = new TrapezoidProfile.State();
+        this.motionProfileSetPoint = new TrapezoidProfile.State();
+        this.motionProfileFinished = false;
+
         SmartDashboard.putNumber("ArmCommandTarget", position);
         SmartDashboard.putBoolean("ArmCommandControl", false);
         SmartDashboard.putBoolean("ArmCommandInTarget", true);
         SmartDashboard.putNumber("ArmCommandTimeToLimit", -1);
+        SmartDashboard.putBoolean("ArmCommandProfileFinished", false);
 
         addRequirements(arm);
     }
@@ -55,15 +70,22 @@ public class ArmCommand extends Command {
 
             SmartDashboard.putNumber("ArmCommandTarget", position);
             SmartDashboard.putNumber("ArmCommandTimeToLimit", -1);
+            SmartDashboard.putBoolean("ArmCommandProfileFinished", false);
 
             if (position > 0) {
-                arm.setMoveToPosition(position);
+                motionProfile = new TrapezoidProfile(motionProfileConstraints);
+                motionProfileGoal = new TrapezoidProfile.State(position, 0);
+                motionProfileSetPoint = new TrapezoidProfile.State(arm.getAngleDegrees(), 0);
+                motionProfileFinished = false;
+
                 limitTimer.restart();
 
                 SmartDashboard.putBoolean("ArmCommandControl", true);
             } else {
                 arm.stop();
                 limitTimer.stop();
+
+                motionProfileGoal = null;
 
                 SmartDashboard.putBoolean("ArmCommandControl", false);
             }
@@ -79,7 +101,20 @@ public class ArmCommand extends Command {
             return;
         }
 
-        int timeLimitLeft = (int) (MAX_HOLD_ARM_TIME_SEC - limitTimer.get());
+        if (!motionProfileFinished) {
+            motionProfileSetPoint = motionProfile.calculate(0.02, motionProfileSetPoint, motionProfileGoal);
+            arm.setMoveToPosition(motionProfileSetPoint.position);
+
+            if (isInTarget) {
+                SmartDashboard.putBoolean("ArmCommandProfileFinished", true);
+                motionProfileFinished = true;
+            }
+        } else  {
+            arm.setMoveToPosition(position);
+        }
+
+        double currentTime = limitTimer.get();
+        int timeLimitLeft = (int) (MAX_HOLD_ARM_TIME_SEC - currentTime);
         SmartDashboard.putNumber("ArmCommandTimeToLimit", timeLimitLeft);
 
         if (isInTarget && position <= RobotMap.ARM_ANGLE_BEFORE_STOP) {

@@ -1,31 +1,31 @@
 package frc.robot;
 
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.hardware.CANcoder;
 import com.pathplanner.lib.commands.FollowPathHolonomic;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
-import com.revrobotics.CANSparkLowLevel;
-import com.revrobotics.CANSparkMax;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj2.command.*;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import frc.robot.commands.*;
+import frc.robot.commands.ArmCommand;
+import frc.robot.commands.DriveWithXBox;
+import frc.robot.commands.ForwardNote;
+import frc.robot.commands.IntakeIn;
+import frc.robot.commands.IntakeOut;
+import frc.robot.commands.ShooterAMP;
+import frc.robot.commands.ShooterSpeaker;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Climb;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Swerve;
-import frc.robot.commands.ArmCommand;
-import frc.robot.commands.DriveWithXBox;
-import frc.robot.commands.IntakeIn;
-import frc.robot.commands.IntakeOut;
-import frc.robot.commands.ShooterAMP;
-import frc.robot.commands.ShooterSpeaker;
-import frc.robot.subsystems.*;
 
 public class Robot extends TimedRobot {
 
@@ -170,8 +170,6 @@ public class Robot extends TimedRobot {
                         Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_ANGLE_BEFORE_STOP)),
                         new IntakeIn(intake)),
                 Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_DEAFULT_ANGLE))
-
-
         );
     }
 }
