@@ -25,10 +25,10 @@ public class RobotMap {
 
     public static final int PIGEON = 9;
     public static final double ATTAINBLE_MAX_SPEED_MPS_SWERVE = 4.5;
-    public static final double SWEARVE_ABSOLUTE_FL_ZERO_ANGLE = 180;
-    public static final double SWEARVE_ABSOLUTE_FR_ZERO_ANGLE = -155.6;
-    public static final double SWEARVE_ABSOLUTE_RL_ZERO_ANGLE = 48.5;
-    public static final double SWEARVE_ABSOLUTE_RR_ZERO_ANGLE = -167.9;
+    public static final double SWEARVE_ABSOLUTE_FL_ZERO_ANGLE = 2.2;
+    public static final double SWEARVE_ABSOLUTE_FR_ZERO_ANGLE = 144;
+    public static final double SWEARVE_ABSOLUTE_RL_ZERO_ANGLE = -129.3;
+    public static final double SWEARVE_ABSOLUTE_RR_ZERO_ANGLE = 13;
     public static final int SWERVE_LF_DRIVE_ID = 51;
     public static final int SWERVE_RF_DRIVE_ID = 41;
     public static final int SWERVE_LB_DRIVE_ID = 61;
