@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
 import edu.wpi.first.math.estimator.PoseEstimator;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -11,6 +12,7 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
@@ -32,6 +34,8 @@ public class Swerve extends SubsystemBase {
     private final Field2d field;
     private final DifferentialDrivePoseEstimator s_diffrenetialDrivePoseEstimator;
     private final DifferentialDriveKinematics s_kinematics;
+    private final SwerveDrivePoseEstimator swerveDrivePoseEstimator;
+    private Pose2d robotPose;
 
     public Swerve(SwerveModule[] swerveModules) {
         sysIdRoutine = new SysIdRoutine(new SysIdRoutine.Config(), new SysIdRoutine.Mechanism(this::volatageDrive, this::sysidLog, this));
@@ -48,7 +52,9 @@ public class Swerve extends SubsystemBase {
         odometry = new SwerveDriveOdometry(kinematics, getHeadingDegrees(), getModulesPosition());
         field = new Field2d();
         SmartDashboard.putData("Field", field);
+        robotPose = new Pose2d();
         s_kinematics = new DifferentialDriveKinematics(RobotMap.DISTANCE_MODULE_TO_CENTER_CHASSIS_METERS*2); // check if true!
+        swerveDrivePoseEstimator = new SwerveDrivePoseEstimator(kinematics,new Rotation2d(),getModulesPosition(),robotPose);
         s_diffrenetialDrivePoseEstimator = new DifferentialDrivePoseEstimator(s_kinematics,getHeadingDegrees(), getDistancePassedMetersLeft(),getDistancePassedMetersRight(), new Pose2d());
     }
 
@@ -87,11 +93,21 @@ public class Swerve extends SubsystemBase {
     public ChassisSpeeds getSpeeds() {
         return kinematics.toChassisSpeeds(new SwerveDriveKinematics.SwerveDriveWheelStates(getModuleStates()));
     }
+
     public double getDistancePassedMetersLeft(){return ((-swerveModules[0].getDistancePassedMeters()+(-swerveModules[2].getDistancePassedMeters())/2));}
+    public double getDistancePassedMetersLeft2(){return (-swerveModules[0].getDistancePassedMeters());}
     public double getDistancePassedMetersRight(){return ((-swerveModules[1].getDistancePassedMeters()+(-swerveModules[3].getDistancePassedMeters())/2));}
+    public double getDistancePassedMetersRight2(){return (-swerveModules[1].getDistancePassedMeters());}
+    public void updatePoseEstimatorByVision(Pose2d robotPose){
+            this.s_diffrenetialDrivePoseEstimator.addVisionMeasurement(robotPose, Timer.getFPGATimestamp());
+            this.swerveDrivePoseEstimator.addVisionMeasurement(robotPose,Timer.getFPGATimestamp());
+            this.field.setRobotPose(robotPose);
+
+    }
     public void updatePoseEstimator(){
-        if(LimelightHelpers.getTV("limelight-banana")){this.field.setRobotPose(LimelightHelpers.getBotPose2d_wpiBlue("limelight-banana"));}
-       else{this.field.setRobotPose(this.s_diffrenetialDrivePoseEstimator.update(getHeadingDegrees(), getDistancePassedMetersLeft(), getDistancePassedMetersRight()));}
+        robotPose =s_diffrenetialDrivePoseEstimator.update(getHeadingDegrees(),getDistancePassedMetersLeft(),getDistancePassedMetersRight());
+        robotPose = swerveDrivePoseEstimator.update(getHeadingDegrees(),)
+        field.setRobotPose(robotPose);
     }
 
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
