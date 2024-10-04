@@ -11,10 +11,7 @@ import com.revrobotics.CANSparkLowLevel;
 import com.revrobotics.CANSparkMax;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.*;
 import frc.robot.subsystems.Arm;
@@ -68,6 +65,7 @@ public class Robot extends TimedRobot {
         new JoystickButton(xboxController, XboxController.Button.kX.value)
                 .whileTrue(new IntakeOut(intake));
         new JoystickButton(xboxController, XboxController.Button.kA.value).onTrue(collectFromFloor());
+        Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_DEAFULT_ANGLE));
     }
 
     @Override
@@ -142,23 +140,38 @@ public class Robot extends TimedRobot {
     }
 
     private Command shooterAMP(){
-        return new ParallelCommandGroup(
+        return new SequentialCommandGroup(
+         new ParallelCommandGroup(
                 Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_AMP_ANGLE)),
                 new ShooterAMP(shooter, intake),
-                new ForwardNote(shooter, intake, false));
+                new ForwardNote(shooter, intake, false)),
+                Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_DEAFULT_ANGLE))
+
+        );
+
     }
 
     private Command shooterSpeaker(){
-        return new ParallelCommandGroup(
+        return new SequentialCommandGroup(
+         new ParallelCommandGroup(
                 Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_SPEAKER_ANGLE)),
                 new ShooterSpeaker(shooter, intake),
-                new ForwardNote(shooter, intake, true));
+                new ForwardNote(shooter, intake, true)),
+                Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_DEAFULT_ANGLE))
+
+
+        );
+
     }
 
     private Command collectFromFloor(){
-        return new ParallelCommandGroup(
-                Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_ANGLE_BEFORE_STOP)),
-                new IntakeIn(intake));
+        return new SequentialCommandGroup(
+                new ParallelCommandGroup(
+                        Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_ANGLE_BEFORE_STOP)),
+                        new IntakeIn(intake)),
+                Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_DEAFULT_ANGLE))
 
+
+        );
     }
 }
