@@ -5,32 +5,26 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DataLogManager;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.commands.*;
-import frc.robot.subsystems.*;
 
 import java.util.Collections;
 import frc.robot.commands.ArmCommand;
 import frc.robot.commands.DriveWithXBox;
 import frc.robot.commands.ForwardNote;
 import frc.robot.commands.IntakeIn;
-import frc.robot.commands.IntakeOut;
 import frc.robot.commands.ShooterAMP;
 import frc.robot.commands.ShooterSpeaker;
 import frc.robot.subsystems.Arm;
@@ -75,25 +69,45 @@ public class Robot extends TimedRobot {
                 .onTrue(new UpAndDown(climb, false));
         */
 
-        Pose2d fakeTarget = new Pose2d(0, 2, Rotation2d.fromDegrees(180));
+        Pose2d fakeTarget = new Pose2d(5.75, 0, Rotation2d.fromDegrees(180));
         swerve.getField().getObject("target").setPose(fakeTarget);
+
 
         new JoystickButton(xboxController, XboxController.Button.kY.value).onTrue(shooterAMP());
         new JoystickButton(xboxController, XboxController.Button.kB.value).onTrue(shooterSpeaker());
         new JoystickButton(xboxController, XboxController.Button.kX.value).onTrue(new IntakeOut(intake));
-        new JoystickButton(xboxController,XboxController.Button.kB.value).onTrue(shooterSpeaker());
+        new JoystickButton(xboxController,XboxController.Button.kA.value).onTrue(collectFromFloor());
 
+
+/*
         new JoystickButton(xboxController, XboxController.Button.kA.value)
                 .onTrue(new IntakeIn(intake));
         new JoystickButton(xboxController, XboxController.Button.kX.value)
-                .onTrue(new ForwardNote(shooter, intake, true));
+                .whileTrue(new IntakeOutToShooter(intake));
+        new JoystickButton(xboxController, XboxController.Button.kY.value)
+                .onTrue(Commands.runOnce(() -> armCommand.gentlyDrop()));
+
+ */
 
 
         new JoystickButton(xboxController, XboxController.Button.kStart.value).onTrue(new DeferredCommand(()-> {
             TargetInfo targetInfo = swerve.getTargetInfoFromCurrentPos(fakeTarget);
+            double speed = shooter.calculateFiringSpeedRpm(targetInfo.getDistance());
+
             SmartDashboard.putNumber("FakeTargetStart", swerve.getHeadingDegrees().getDegrees());
             SmartDashboard.putNumber("FakeTargetAngle", targetInfo.getAngle());
-            return new RotateToAngle(swerve, targetInfo.getAngle());
+            SmartDashboard.putNumber("FakeTargetSpeedToHit", speed);
+
+            return new SequentialCommandGroup(
+                    new RotateToAngle(swerve, targetInfo.getAngle()),
+                    Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_SPEAKER_ANGLE)),
+                    Commands.waitUntil(() -> armCommand.didReachTarget()),
+                    new ParallelCommandGroup(
+                            new ForwardNote(shooter, intake, speed),
+                            new ShooterSpeakerSpeed(shooter, intake, speed)
+                    )
+
+            );
         }, Collections.emptySet()));
 
     }
@@ -172,19 +186,26 @@ public class Robot extends TimedRobot {
     }
 
     double velocity;
+    double angle;
     @Override
     public void testInit() {
         velocity = 0;
+        angle = 0;
         SmartDashboard.putNumber("velocity", 0);
-        armCommand.changeTarget(60);
+        SmartDashboard.putNumber("angle", 0);
     }
 
     @Override
     public void testPeriodic() {
         double velocity = SmartDashboard.getNumber("velocity", 0);
+        double angle = SmartDashboard.getNumber("angle", 0);
         if (velocity > 0 && this.velocity != velocity) {
             shooter.movePid(velocity);
             this.velocity = velocity;
+        }
+        if(angle > 0 && this.angle != angle){
+            armCommand.changeTarget(angle);
+            this.angle = angle;
         }
     }
 
@@ -204,7 +225,7 @@ public class Robot extends TimedRobot {
                 Commands.waitUntil(() -> armCommand.didReachTarget()),
                 new ParallelCommandGroup(
                         new ShooterAMP(shooter, intake),
-                        new ForwardNote(shooter, intake, false)
+                        new ForwardNote(shooter, intake, RobotMap.SHOOTER_SPEED_AMP)
                 ),
                 Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_DEFAULT_ANGLE))
         );
@@ -216,7 +237,7 @@ public class Robot extends TimedRobot {
                 Commands.waitUntil(() -> armCommand.didReachTarget()),
                 new ParallelCommandGroup(
                         new ShooterSpeaker(shooter, intake),
-                        new ForwardNote(shooter, intake, true)
+                        new ForwardNote(shooter, intake, RobotMap.SHOOTER_SPEED_SPEAKER)
                 ),
                 Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_DEFAULT_ANGLE))
         );

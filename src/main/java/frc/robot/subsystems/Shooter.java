@@ -1,7 +1,6 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.*;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
@@ -18,10 +17,10 @@ public class Shooter extends SubsystemBase {
     public static double TOLERANCE = 150;
     private static double KF = 0.000185;
 
-    private static final double[] FIRING_X = {
+    private static final double[] FIRING_X = {6.75,7.75,5.75
 
     };
-    private static final double[] FIRING_Y = {
+    private static final double[] FIRING_Y = {2550,2650,2250
 
     };
 
@@ -58,7 +57,7 @@ public class Shooter extends SubsystemBase {
         motorRight.setIdleMode(CANSparkBase.IdleMode.kCoast);
         motorLeft.setIdleMode(CANSparkBase.IdleMode.kCoast);
 
-        //firingFunction = new PolynomialFunctionLagrangeForm(FIRING_X, FIRING_Y);
+        firingFunction = new PolynomialFunctionLagrangeForm(FIRING_X, FIRING_Y);
 
         SmartDashboard.putNumber("KF Shooter", KF);
     }
@@ -92,7 +91,7 @@ public class Shooter extends SubsystemBase {
         pidControllerLeft.setIAccum(0);
     }
 
-    public double calculateFiringSpeed(double distanceMeters) {
+    public double calculateFiringSpeedRpm(double distanceMeters) {
         return firingFunction.value(distanceMeters);
     }
 

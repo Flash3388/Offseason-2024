@@ -8,13 +8,13 @@ public class RobotMap {
     public static final double ARM_ANGLE_BEFORE_STOP = 15.7;
     public static final double ARM_CEILING_ANGLE = 123;
     public static final double ARM_AMP_ANGLE = 120;
-    public static final double ARM_SPEAKER_ANGLE = 30;
+    public static final double ARM_SPEAKER_ANGLE = 47;
     public static final double ARM_DEFAULT_ANGLE = 60;
 
     public final static double SHOOTER_RIGHT_KP1 = 0.00000175;
-    public final static double SHOOTER_RIGHT_KP2 = 0.00018;
+    public final static double SHOOTER_RIGHT_KP2 = 0.00019;
     public final static double SHOOTER_LEFT_KP1 = 0.00000178;
-    public final static double SHOOTER_LEFT_KP2 = 0.00018;
+    public final static double SHOOTER_LEFT_KP2 = 0.00019;
     public static final int SHOOTER_MOTOR_LEFT = 14;
     public static final int SHOOTER_MOTOR_RIGHT = 12;
     public static final double SHOOTER_SPEED_AMP = 1000;
