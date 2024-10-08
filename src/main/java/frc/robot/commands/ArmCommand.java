@@ -12,7 +12,7 @@ import frc.robot.subsystems.Arm;
 
 public class ArmCommand extends Command {
 
-    private static final double MAX_HOLD_ARM_TIME_SEC = 60;
+    private static final double MAX_HOLD_ARM_TIME_SEC = 200;
     private static final double POSITION_DROP = -1;
     private static final double MAX_VELOCITY_RPM = 1000;
     private static final double MAX_ACCELERATION_RPM_S = 200;

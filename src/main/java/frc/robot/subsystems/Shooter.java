@@ -5,6 +5,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
+import org.apache.commons.math3.analysis.polynomials.PolynomialFunctionLagrangeForm;
 
 public class Shooter extends SubsystemBase {
     private CANSparkMax motorRight;
@@ -16,6 +17,15 @@ public class Shooter extends SubsystemBase {
     private SparkPIDController pidControllerLeft;
     public static double TOLERANCE = 150;
     private static double KF = 0.000185;
+
+    private static final double[] FIRING_X = {
+
+    };
+    private static final double[] FIRING_Y = {
+
+    };
+
+    private PolynomialFunctionLagrangeForm firingFunction;
 
     public Shooter() {
         motorRight = new CANSparkMax(RobotMap.SHOOTER_MOTOR_RIGHT, CANSparkLowLevel.MotorType.kBrushless);
@@ -48,6 +58,8 @@ public class Shooter extends SubsystemBase {
         motorRight.setIdleMode(CANSparkBase.IdleMode.kCoast);
         motorLeft.setIdleMode(CANSparkBase.IdleMode.kCoast);
 
+        //firingFunction = new PolynomialFunctionLagrangeForm(FIRING_X, FIRING_Y);
+
         SmartDashboard.putNumber("KF Shooter", KF);
     }
 
@@ -78,6 +90,10 @@ public class Shooter extends SubsystemBase {
     public void resetPid() {
         pidControllerRight.setIAccum(0);
         pidControllerLeft.setIAccum(0);
+    }
+
+    public double calculateFiringSpeed(double distanceMeters) {
+        return firingFunction.value(distanceMeters);
     }
 
     @Override

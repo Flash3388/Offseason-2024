@@ -74,10 +74,16 @@ public class Robot extends TimedRobot {
 
         new JoystickButton(xboxController, XboxController.Button.kY.value).onTrue(shooterAMP());
         new JoystickButton(xboxController,XboxController.Button.kB.value).onTrue(shooterSpeaker());
-        new JoystickButton(xboxController, XboxController.Button.kX.value)
+        /*new JoystickButton(xboxController, XboxController.Button.kX.value)
                 .whileTrue(new IntakeOut(intake));
         new JoystickButton(xboxController, XboxController.Button.kA.value).onTrue(collectFromFloor());
         Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_DEAFULT_ANGLE));
+         */
+
+        new JoystickButton(xboxController, XboxController.Button.kA.value)
+                .onTrue(new IntakeIn(intake));
+        new JoystickButton(xboxController, XboxController.Button.kX.value)
+                .onTrue(new ForwardNote(shooter, intake, true));
 
 
         new JoystickButton(xboxController, XboxController.Button.kStart.value).onTrue(new DeferredCommand(()-> {
@@ -139,12 +145,21 @@ public class Robot extends TimedRobot {
 
     }
 
+    double velocity;
     @Override
     public void testInit() {
+        velocity = 0;
+        SmartDashboard.putNumber("velocity", 0);
+        armCommand.changeTarget(60);
     }
 
     @Override
     public void testPeriodic() {
+        double velocity = SmartDashboard.getNumber("velocity", 0);
+        if (velocity > 0 && this.velocity != velocity) {
+            shooter.movePid(velocity);
+            this.velocity = velocity;
+        }
     }
 
     @Override
