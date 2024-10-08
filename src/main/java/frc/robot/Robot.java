@@ -80,18 +80,8 @@ public class Robot extends TimedRobot {
 
         new JoystickButton(xboxController, XboxController.Button.kY.value).onTrue(shooterAMP());
         new JoystickButton(xboxController, XboxController.Button.kB.value).onTrue(shooterSpeaker());
-        new JoystickButton(xboxController, XboxController.Button.kX.value)
+        new JoystickButton(xboxController, XboxController.Button.kX.value).onTrue(new IntakeOut(intake));
         new JoystickButton(xboxController,XboxController.Button.kB.value).onTrue(shooterSpeaker());
-        /*new JoystickButton(xboxController, XboxController.Button.kX.value)
-                .whileTrue(new IntakeOut(intake));
-        new JoystickButton(xboxController, XboxController.Button.kA.value).onTrue(collectFromFloor());
-
-        new POVButton(xboxController, 0).onTrue(Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_AMP_ANGLE)));
-        new POVButton(xboxController, 180).onTrue(Commands.runOnce(() -> armCommand.gentlyDrop()));
-
-        SmartDashboard.putBoolean("ArmDisabledBrake", false);
-        Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_DEAFULT_ANGLE));
-         */
 
         new JoystickButton(xboxController, XboxController.Button.kA.value)
                 .onTrue(new IntakeIn(intake));
