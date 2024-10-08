@@ -29,7 +29,7 @@ public class Robot extends TimedRobot {
     private XboxController xboxController;
     private LimelightHelpers limelightHelper;
     private AprilTagFieldLayout layout;
-    NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight-banana");
+    private NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight-banana");
 
     @Override
     public void robotInit() {
@@ -37,6 +37,7 @@ public class Robot extends TimedRobot {
         this.climb = new Climb();
         this.shooter = new Shooter();
         this.intake = new Intake();
+        table.getEntry("pipeline").setValue(limelightHelper); //what is the value
 
         this.xboxController = new XboxController(0);
 
@@ -81,7 +82,7 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopPeriodic() {
         int id;       //if needed is the id target-for example speaker id of blue alliance is 7
-        if(LimelightHelpers.getTV("limelight-banana")){
+        if(!LimelightHelpers.getTV("limelight-banana")){
              id = (int) LimelightHelpers.getFiducialID("limelight-banana");
 
             Optional<Pose3d> tagPoseOptional = layout.getTagPose(id);
