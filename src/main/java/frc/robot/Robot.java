@@ -27,6 +27,7 @@ public class Robot extends TimedRobot {
     private Shooter shooter;
     private Intake intake;
     private XboxController xboxController;
+    private LimelightBanana limelightBanana;
     private LimelightHelpers limelightHelper;
     private AprilTagFieldLayout layout;
     private NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight-banana");
@@ -37,7 +38,7 @@ public class Robot extends TimedRobot {
         this.climb = new Climb();
         this.shooter = new Shooter();
         this.intake = new Intake();
-        table.getEntry("pipeline").setValue(limelightHelper); //what is the value
+        table.getEntry("pipeline").setValue(1); //what is the value
 
         this.xboxController = new XboxController(0);
 
@@ -81,8 +82,9 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopPeriodic() {
-        int id;       //if needed is the id target-for example speaker id of blue alliance is 7
-        if(!LimelightHelpers.getTV("limelight-banana")){
+        int id;
+        double distance;  //if needed is the id target-for example speaker id of blue alliance is 7
+        /*if(!LimelightHelpers.getTV("limelight-banana")){
              id = (int) LimelightHelpers.getFiducialID("limelight-banana");
 
             Optional<Pose3d> tagPoseOptional = layout.getTagPose(id);
@@ -91,11 +93,12 @@ public class Robot extends TimedRobot {
             }
             Pose3d tagPose = tagPoseOptional.get(); //if didn't check would crash
             Pose2d robotPose = swerve.getRobotPose();
-            double distance = Math.sqrt(
+             distance = Math.sqrt(
                     Math.pow(tagPose.getX()-robotPose.getX(),2)
                             +Math.pow(tagPose.getY()-robotPose.getY(),2));
             SmartDashboard.putNumber("distance with id", distance);
         }
+         */
     }
 
     @Override
@@ -141,22 +144,22 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
-        this.swerve.updatePoseEstimator();
+        double distance;
         if(LimelightHelpers.getTV("limelight-banana")){             //create a function
             swerve.updatePoseEstimatorByVision(LimelightHelpers.getBotPose2d_wpiBlue("limelight-banana"));
+        }else {
+            distance = limelightBanana.distanceWithId(this.swerve);
+            SmartDashboard.putNumber("distance with id", distance);
         }
+        this.swerve.updatePoseEstimator();
         CommandScheduler.getInstance().run();
-        SmartDashboard.putBoolean("Target-Seen",LimelightHelpers.getTV("limelight-banana"));
-        SmartDashboard.putNumber("tx", table.getEntry("tx").getDouble(0.0) );
-        SmartDashboard.putNumber("ty",table.getEntry("ty").getDouble(0.0));
-        SmartDashboard.putNumber("distance2",NetworkTableInstance.getDefault().getTable("limelight-banana").getEntry("botpose").getDoubleArray(new double[6])[2]);
-        SmartDashboard.putNumber("distance5",NetworkTableInstance.getDefault().getTable("limelight-banana").getEntry("botpose").getDoubleArray(new double[6])[5]);
-        double distance = Math.sqrt(
+        this.limelightBanana.PrintAll();
+       /* double distance = Math.sqrt(
                 Math.pow(robotPoseTargetSpace[0],2)+
                         Math.pow(robotPoseTargetSpace[1],2)+
                         Math.pow(robotPoseTargetSpace[2],2)
         );
-        SmartDashboard.putNumber("distancetargetspace", distance);
+        */
     }
 
     @Override
