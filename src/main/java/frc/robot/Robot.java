@@ -145,7 +145,7 @@ public class Robot extends TimedRobot {
     @Override
     public void robotPeriodic() {
         double distance;
-        if(LimelightHelpers.getTV("limelight-banana")){             //create a function
+        if(limelightBanana.targetIsSeen()){             //create a function
             swerve.updatePoseEstimatorByVision(LimelightHelpers.getBotPose2d_wpiBlue("limelight-banana"));
         }else {
             distance = limelightBanana.distanceWithId(this.swerve);
