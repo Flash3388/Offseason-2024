@@ -145,7 +145,7 @@ public class ArmCommand extends Command {
                     DriverStation.reportError("Arm is stuck and is no longer moving", false);
                 }
             }
-        } else {
+        } else if (armKnownStuck || armStuckTimerRunning) {
             armKnownStuck = false;
             armStuckTimerRunning = false;
             armStuckTimer.stop();
