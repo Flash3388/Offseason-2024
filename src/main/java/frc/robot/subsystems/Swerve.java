@@ -53,7 +53,7 @@ public class Swerve extends SubsystemBase {
         field = new Field2d();
         SmartDashboard.putData("Field", field);
         robotPose = new Pose2d();
-        swerveDrivePoseEstimator = new SwerveDrivePoseEstimator(kinematics,new Rotation2d(),getModulesPosition(),robotPose);
+        swerveDrivePoseEstimator = new SwerveDrivePoseEstimator(kinematics,getHeadingDegrees(),getModulesPosition(),robotPose);
     }
 
     public Rotation2d getHeadingDegrees(){
@@ -97,14 +97,15 @@ public class Swerve extends SubsystemBase {
     public double getDistancePassedMetersRight(){return ((-swerveModules[1].getDistancePassedMeters()+(-swerveModules[3].getDistancePassedMeters())/2));}
     public double getDistancePassedMetersRight2(){return (-swerveModules[1].getDistancePassedMeters());}
     public void updatePoseEstimatorByVision(Pose2d robotPose){
-            this.swerveDrivePoseEstimator.addVisionMeasurement(robotPose,Timer.getFPGATimestamp());
-            this.field.setRobotPose(robotPose);
-
+        this.robotPose =robotPose;
+            //this.swerveDrivePoseEstimator.addVisionMeasurement(robotPose,Timer.getFPGATimestamp());
+            setRobotPoseField(this.robotPose);
     }
     public void updatePoseEstimator(){
-        robotPose = swerveDrivePoseEstimator.update(getHeadingDegrees(),getModulesPosition());
-        field.setRobotPose(robotPose);
+        robotPose = this.odometry.getPoseMeters();
+        setRobotPoseField(robotPose);
     }
+    public void setRobotPoseField(Pose2d robotPoseField){field.setRobotPose(robotPoseField);}
     public Pose2d getRobotPose(){return robotPose;}
 
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
@@ -181,7 +182,7 @@ public class Swerve extends SubsystemBase {
         }
 
         odometry.update(rotation, getModulesPosition());
-        field.setRobotPose(odometry.getPoseMeters());
+        //setRobotPoseField(odometry.getPoseMeters());
     }
 
     private void sysidLog(SysIdRoutineLog log) {

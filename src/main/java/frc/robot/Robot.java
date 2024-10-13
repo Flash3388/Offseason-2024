@@ -3,6 +3,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -35,9 +36,10 @@ public class Robot extends TimedRobot {
     @Override
     public void robotInit() {
         this.swerve = SystemFactory.createSwerve();
-        this.climb = new Climb();
-        this.shooter = new Shooter();
-        this.intake = new Intake();
+        this.limelightBanana = new LimelightBanana(this.swerve);
+      //  this.climb = new Climb();
+      //  this.shooter = new Shooter();
+      //  this.intake = new Intake();
         table.getEntry("pipeline").setValue(1); //what is the value
 
         this.xboxController = new XboxController(0);
@@ -49,7 +51,7 @@ public class Robot extends TimedRobot {
                 .onTrue(new UpAndDown(climb, true));
         new JoystickButton(xboxController, XboxController.Button.kB.value)
                 .onTrue(new UpAndDown(climb, false));
-        */
+
         new JoystickButton(xboxController, XboxController.Button.kB.value)
                 .onTrue(new ShooterAMP(shooter, RobotMap.SHOOTER_SPEED_AMP, intake));
         new JoystickButton(xboxController, XboxController.Button.kA.value)
@@ -59,7 +61,7 @@ public class Robot extends TimedRobot {
                 .onTrue(new IntakeIn(intake));
         new JoystickButton(xboxController, XboxController.Button.kX.value)
                 .whileTrue(new IntakeOut(intake));
-
+*/
         robotPoseTargetSpace = LimelightHelpers.getCameraPose_TargetSpace("Limelight-banana");
         layout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
     }
@@ -103,6 +105,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
+        /*
         ReplanningConfig replanningConfig = new ReplanningConfig(
                 false,
                 false);
@@ -125,6 +128,8 @@ public class Robot extends TimedRobot {
                 },
                 swerve);
         pathHolonomic.schedule();
+
+         */
     }
 
     @Override
@@ -146,20 +151,26 @@ public class Robot extends TimedRobot {
     public void robotPeriodic() {
         double distance;
         if(limelightBanana.targetIsSeen()){             //create a function
-            swerve.updatePoseEstimatorByVision(LimelightHelpers.getBotPose2d_wpiBlue("limelight-banana"));
+           swerve.updatePoseEstimatorByVision(limelightBanana.getPose2dBlue());
+           distance = limelightBanana.distanceWithVision();
+            SmartDashboard.putNumber("distance with vision", distance);
         }else {
-            distance = limelightBanana.distanceWithId(this.swerve);
+            distance = limelightBanana.distanceWithoutVision();
+            this.swerve.updatePoseEstimator();
             SmartDashboard.putNumber("distance with id", distance);
         }
-        this.swerve.updatePoseEstimator();
-        CommandScheduler.getInstance().run();
         this.limelightBanana.PrintAll();
+        this.swerve.setRobotPoseField(new Pose2d(4.3,6.1,new Rotation2d(0)));
+        this.swerve.periodic();
        /* double distance = Math.sqrt(
                 Math.pow(robotPoseTargetSpace[0],2)+
                         Math.pow(robotPoseTargetSpace[1],2)+
                         Math.pow(robotPoseTargetSpace[2],2)
         );
         */
+
+
+        CommandScheduler.getInstance().run();
     }
 
     @Override
