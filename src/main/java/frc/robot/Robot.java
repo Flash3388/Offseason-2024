@@ -126,13 +126,13 @@ public class Robot extends TimedRobot {
                 false,
                 false);
         HolonomicPathFollowerConfig holonomicPathFollowerConfig = new HolonomicPathFollowerConfig(
-                new PIDConstants(0.5, 0, 0.00007),
-                new PIDConstants(0.5, 0, 0.00007),
+                new PIDConstants(0.005, 0.00001, 0.00007),
+                new PIDConstants(0.005, 0.00001, 0.00007),
                 4.4169,
                 RobotMap.CHASSIS_RADIUS,
                 replanningConfig
         );
-        PathPlannerPath pathS = PathPlannerPath.fromPathFile("Off-season-check");
+        PathPlannerPath pathS = PathPlannerPath.fromPathFile("training");
         FollowPathHolonomic pathHolonomic = new FollowPathHolonomic(
                 pathS,
                 swerve::getPose,
