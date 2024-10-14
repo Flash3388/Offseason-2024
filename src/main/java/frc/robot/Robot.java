@@ -160,7 +160,7 @@ public class Robot extends TimedRobot {
             SmartDashboard.putNumber("distance with id", distance);
         }
         this.limelightBanana.PrintAll();
-        this.swerve.setRobotPoseField(new Pose2d(4.3,6.1,new Rotation2d(0)));
+        //this.swerve.setRobotPoseField(new Pose2d(4.3,6.1,new Rotation2d(0)));
         this.swerve.periodic();
        /* double distance = Math.sqrt(
                 Math.pow(robotPoseTargetSpace[0],2)+
