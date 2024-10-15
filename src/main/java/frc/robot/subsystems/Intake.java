@@ -11,7 +11,7 @@ public class Intake extends SubsystemBase {
     private CANSparkMax motor;
     private DigitalInput left;
     private DigitalInput right;
-    private static final double SPEED = 0.4;
+    private static final double SPEED = 0.9;
 
     public Intake() {
         this.motor = new CANSparkMax(RobotMap.INTAKE_ID_MOTOR, CANSparkMax.MotorType.kBrushless);

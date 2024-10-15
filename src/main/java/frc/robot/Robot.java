@@ -72,24 +72,30 @@ public class Robot extends TimedRobot {
         Pose2d fakeTarget = new Pose2d(5.75, 0, Rotation2d.fromDegrees(180));
         swerve.getField().getObject("target").setPose(fakeTarget);
 
-
+/*
         new JoystickButton(xboxController, XboxController.Button.kY.value).onTrue(shooterAMP());
         new JoystickButton(xboxController, XboxController.Button.kB.value).onTrue(shooterSpeaker());
         new JoystickButton(xboxController, XboxController.Button.kX.value).onTrue(new IntakeOut(intake));
         new JoystickButton(xboxController,XboxController.Button.kA.value).onTrue(collectFromFloor());
 
 
-/*
+ */
+
+        new JoystickButton(xboxController, XboxController.Button.kA.value)
+                .onTrue(collectFromFloor());
+        /*
         new JoystickButton(xboxController, XboxController.Button.kA.value)
                 .onTrue(new IntakeIn(intake));
+
+         */
         new JoystickButton(xboxController, XboxController.Button.kX.value)
                 .whileTrue(new IntakeOutToShooter(intake));
         new JoystickButton(xboxController, XboxController.Button.kY.value)
                 .onTrue(Commands.runOnce(() -> armCommand.gentlyDrop()));
 
- */
 
 
+/*
         new JoystickButton(xboxController, XboxController.Button.kStart.value).onTrue(new DeferredCommand(()-> {
             TargetInfo targetInfo = swerve.getTargetInfoFromCurrentPos(fakeTarget);
             double speed = shooter.calculateFiringSpeedRpm(targetInfo.getDistance());
@@ -109,6 +115,8 @@ public class Robot extends TimedRobot {
 
             );
         }, Collections.emptySet()));
+
+ */
 
     }
 
@@ -146,7 +154,10 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
+        this.velocity = 0;
+        this.angle = 0;
         armCommand.changeTarget(RobotMap.ARM_DEFAULT_ANGLE);
+        shooter.stop();
     }
 
     @Override
@@ -191,15 +202,16 @@ public class Robot extends TimedRobot {
     public void testInit() {
         velocity = 0;
         angle = 0;
+        shooter.stop();
         SmartDashboard.putNumber("velocity", 0);
-        SmartDashboard.putNumber("angle", 0);
+        SmartDashboard.putNumber("angle", 0 );
     }
 
     @Override
     public void testPeriodic() {
         double velocity = SmartDashboard.getNumber("velocity", 0);
         double angle = SmartDashboard.getNumber("angle", 0);
-        if (velocity > 0 && this.velocity != velocity) {
+        if (velocity >= 0 && this.velocity != velocity) {
             shooter.movePid(velocity);
             this.velocity = velocity;
         }
@@ -212,6 +224,8 @@ public class Robot extends TimedRobot {
     @Override
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
+        SmartDashboard.putNumber("robotAngle", arm.getAngleDegrees());
+
     }
 
     @Override
@@ -236,8 +250,10 @@ public class Robot extends TimedRobot {
                 Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_SPEAKER_ANGLE)),
                 Commands.waitUntil(() -> armCommand.didReachTarget()),
                 new ParallelCommandGroup(
-                        new ShooterSpeaker(shooter, intake),
-                        new ForwardNote(shooter, intake, RobotMap.SHOOTER_SPEED_SPEAKER)
+                        //new ShooterSpeaker(shooter, intake),
+                        //new ForwardNote(shooter, intake, RobotMap.SHOOTER_SPEED_SPEAKER)
+                        new ShooterSpeaker(shooter, intake, this.velocity),
+                        new ForwardNote(shooter, intake, this.velocity)
                 ),
                 Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_DEFAULT_ANGLE))
         );
