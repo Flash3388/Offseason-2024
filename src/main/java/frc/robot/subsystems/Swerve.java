@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -23,10 +24,10 @@ public class Swerve extends SubsystemBase {
 
 
     private final Pigeon2 pigeon;
-    private final SwerveDriveOdometry odometry;
     private final SwerveModule[] swerveModules;
     private final SwerveDriveKinematics kinematics;
     private final SysIdRoutine sysIdRoutine;
+    private final SwerveDrivePoseEstimator poseEstimator;
     private final Field2d field;
 
     public Swerve(SwerveModule[] swerveModules) {
@@ -39,9 +40,17 @@ public class Swerve extends SubsystemBase {
                 new Translation2d(-distance, distance),
                 new Translation2d(-distance, -distance)
         );
+
         pigeon = new Pigeon2(RobotMap.PIGEON);
         pigeon.setYaw(0);
-        odometry = new SwerveDriveOdometry(kinematics, getHeadingDegrees(), getModulesPosition());
+
+        poseEstimator = new SwerveDrivePoseEstimator(
+                kinematics,
+                getHeadingDegrees(),
+                getModulesPosition(),
+                new Pose2d(0, 0, Rotation2d.fromDegrees(0))
+        );
+
         field = new Field2d();
         SmartDashboard.putData("Field", field);
     }
@@ -57,7 +66,7 @@ public class Swerve extends SubsystemBase {
     }
 
     public Pose2d getPose() {
-        return odometry.getPoseMeters();
+        return poseEstimator.getEstimatedPosition();
     }
 
     public SwerveModulePosition[] getModulesPosition() {
@@ -142,6 +151,10 @@ public class Swerve extends SubsystemBase {
         }
     }
 
+    public void updatePoseWithVision(Pose2d robotPose, double measurementTime) {
+        poseEstimator.addVisionMeasurement(robotPose, measurementTime);
+    }
+
     @Override
     public void periodic() {
         Rotation2d rotation = getHeadingDegrees();
@@ -152,8 +165,8 @@ public class Swerve extends SubsystemBase {
             swerveModules[i].periodic();
         }
 
-        odometry.update(rotation, getModulesPosition());
-        field.setRobotPose(odometry.getPoseMeters());
+        Pose2d pose = poseEstimator.update(rotation, getModulesPosition());
+        field.setRobotPose(pose);
     }
 
     private void sysidLog(SysIdRoutineLog log) {
