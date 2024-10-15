@@ -8,6 +8,7 @@ import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -18,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.commands.*;
 
 import java.util.Collections;
@@ -63,37 +65,31 @@ public class Robot extends TimedRobot {
         DriveWithXBox driveWithXBox = new DriveWithXBox(swerve, xboxController);
         swerve.setDefaultCommand(driveWithXBox);
 
-       /*new JoystickButton(xboxController, XboxController.Button.kA.value)
-                .onTrue(new UpAndDown(climb, true));
-        new JoystickButton(xboxController, XboxController.Button.kB.value)
-                .onTrue(new UpAndDown(climb, false));
-        */
-
         Pose2d fakeTarget = new Pose2d(5.75, 0, Rotation2d.fromDegrees(180));
         swerve.getField().getObject("target").setPose(fakeTarget);
 
-/*
-        new JoystickButton(xboxController, XboxController.Button.kY.value).onTrue(shooterAMP());
-        new JoystickButton(xboxController, XboxController.Button.kB.value).onTrue(shooterSpeaker());
-        new JoystickButton(xboxController, XboxController.Button.kX.value).onTrue(new IntakeOut(intake));
-        new JoystickButton(xboxController,XboxController.Button.kA.value).onTrue(collectFromFloor());
+        new POVButton(xboxController, 0)
+                .onTrue(new UpAndDown(climb, true));
+        new POVButton(xboxController, 180)
+                .onTrue(new UpAndDown(climb, false));
 
-
- */
-
-        new JoystickButton(xboxController, XboxController.Button.kA.value)
-                .onTrue(collectFromFloor());
-        /*
-        new JoystickButton(xboxController, XboxController.Button.kA.value)
-                .onTrue(new IntakeIn(intake));
-
-         */
-        new JoystickButton(xboxController, XboxController.Button.kX.value)
-                .whileTrue(new IntakeOutToShooter(intake));
         new JoystickButton(xboxController, XboxController.Button.kY.value)
+                .onTrue(shooterAMP());
+        new JoystickButton(xboxController, XboxController.Button.kB.value)
+                .onTrue(shooterSpeaker());
+        new JoystickButton(xboxController, XboxController.Button.kX.value)
+                .whileTrue(new IntakeOut(intake));
+        new JoystickButton(xboxController,XboxController.Button.kA.value)
+                .onTrue(collectFromFloor());
+
+        new POVButton(xboxController, 90)
+                .onTrue(new IntakeIn(intake));
+        new POVButton(xboxController, 270)
+                .whileTrue(new IntakeOutToShooter(intake));
+        new JoystickButton(xboxController, XboxController.Button.kRightBumper.value)
                 .onTrue(Commands.runOnce(() -> armCommand.gentlyDrop()));
-
-
+        new JoystickButton(xboxController, XboxController.Button.kLeftBumper.value)
+                .onTrue(Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_CLIMB_ANGLE)));
 
 /*
         new JoystickButton(xboxController, XboxController.Button.kStart.value).onTrue(new DeferredCommand(()-> {
@@ -200,6 +196,7 @@ public class Robot extends TimedRobot {
     double angle;
     @Override
     public void testInit() {
+        armCommand.stopHolding();
         velocity = 0;
         angle = 0;
         shooter.stop();
@@ -221,10 +218,11 @@ public class Robot extends TimedRobot {
         }
     }
 
+    PowerDistribution pdh = new PowerDistribution();
     @Override
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
-        SmartDashboard.putNumber("robotAngle", arm.getAngleDegrees());
+        SmartDashboard.putNumber("PDH Port", pdh.getCurrent(6));
 
     }
 
@@ -250,10 +248,8 @@ public class Robot extends TimedRobot {
                 Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_SPEAKER_ANGLE)),
                 Commands.waitUntil(() -> armCommand.didReachTarget()),
                 new ParallelCommandGroup(
-                        //new ShooterSpeaker(shooter, intake),
-                        //new ForwardNote(shooter, intake, RobotMap.SHOOTER_SPEED_SPEAKER)
-                        new ShooterSpeaker(shooter, intake, this.velocity),
-                        new ForwardNote(shooter, intake, this.velocity)
+                        new ShooterSpeaker(shooter, intake, RobotMap.SHOOTER_SPEED_SPEAKER),
+                        new ForwardNote(shooter, intake, RobotMap.SHOOTER_SPEED_SPEAKER)
                 ),
                 Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_DEFAULT_ANGLE))
         );

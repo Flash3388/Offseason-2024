@@ -8,10 +8,12 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
 
 public class Intake extends SubsystemBase {
+
+    private static final double SPEED = 0.9;
+
     private CANSparkMax motor;
     private DigitalInput left;
     private DigitalInput right;
-    private static final double SPEED = 0.9;
 
     public Intake() {
         this.motor = new CANSparkMax(RobotMap.INTAKE_ID_MOTOR, CANSparkMax.MotorType.kBrushless);
@@ -19,8 +21,6 @@ public class Intake extends SubsystemBase {
         this.left = new DigitalInput(RobotMap.INTAKE_ID_LEFT);
         this.right = new DigitalInput(RobotMap.INTAKE_ID_RIGHT);
         this.motor.setIdleMode(CANSparkBase.IdleMode.kBrake);
-
-
     }
 
     public void in() {
@@ -29,6 +29,10 @@ public class Intake extends SubsystemBase {
 
     public void out() {
         this.motor.set(-SPEED);
+    }
+
+    public void Move(double speed) {
+        motor.set(speed);
     }
 
     public boolean getLeft() {
@@ -51,9 +55,5 @@ public class Intake extends SubsystemBase {
     public void periodic() {
         SmartDashboard.putBoolean("digitalInputLeft", getLeft());
         SmartDashboard.putBoolean("digitalInputRight", getRight());
-    }
-
-    public void Move(double speed) {
-        motor.set(speed);
     }
 }

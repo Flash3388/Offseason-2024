@@ -11,11 +11,14 @@ public class Climb extends SubsystemBase {
     private CANSparkMax motor;
     private SparkLimitSwitch forwardlimitswitch;
     private SparkLimitSwitch reverselimitswitch;
-    private static final double SPEED = 0.3;
+    private static final double SPEED_FORWARD = 0.6;
+    private static final double SPEED_DOWN = -1;
 
     public Climb() {
         motor = new CANSparkMax(RobotMap.CLIMB_MOTOR_ID, CANSparkLowLevel.MotorType.kBrushless);
         motor.restoreFactoryDefaults();
+
+        motor.setSmartCurrentLimit(80);
 
         forwardlimitswitch = motor.getForwardLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen);
         reverselimitswitch = motor.getReverseLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen);
@@ -23,7 +26,7 @@ public class Climb extends SubsystemBase {
 
 
     public void rotateMotor(boolean forwardOrReverse) {
-        double x = forwardOrReverse ? SPEED : -SPEED;
+        double x = forwardOrReverse ? SPEED_FORWARD : SPEED_DOWN;
         motor.set(x);
     }
 
@@ -43,6 +46,7 @@ public class Climb extends SubsystemBase {
     public void periodic() {
         SmartDashboard.putBoolean("ClimbForwardLimitSwitch", getForward());
         SmartDashboard.putBoolean("ClimbReverseLimitSwitch", getReverse());
-        SmartDashboard.putNumber("climeMotor", motor.getOutputCurrent());
+        SmartDashboard.putNumber("ClimbCurrent", motor.getOutputCurrent());
+        SmartDashboard.putNumber("ClimbOutput", motor.getAppliedOutput());
     }
 }
