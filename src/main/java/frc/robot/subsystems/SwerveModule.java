@@ -32,7 +32,7 @@ public class SwerveModule {
     private static final double STEER_D = 0.01;
     private static final double STEER_F = 0.;
 
-    private static final double DRIVE_P = 0.0001;//0.0003;
+    private static final double DRIVE_P = 0.0003;//0.0003;
     private static final double DRIVE_I = 0;//5e-7;
     private static final double DRIVE_D = 0;//5e-7;
     private static final double DRIVE_F = 0.00016;//0.0001;

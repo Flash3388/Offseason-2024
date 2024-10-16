@@ -1,6 +1,8 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.pathplanner.lib.util.PathPlannerLogging;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -28,6 +30,7 @@ public class Swerve extends SubsystemBase {
     private final SwerveDriveKinematics kinematics;
     private final SysIdRoutine sysIdRoutine;
     private final Field2d field;
+    private final PIDController rotationPID;
 
     public Swerve(SwerveModule[] swerveModules) {
         sysIdRoutine = new SysIdRoutine(new SysIdRoutine.Config(), new SysIdRoutine.Mechanism(this::volatageDrive, this::sysidLog, this));
@@ -42,8 +45,13 @@ public class Swerve extends SubsystemBase {
         pigeon = new Pigeon2(RobotMap.PIGEON);
         pigeon.setYaw(0);
         odometry = new SwerveDriveOdometry(kinematics, getHeadingDegrees(), getModulesPosition());
+        rotationPID = new PIDController();
         field = new Field2d();
         SmartDashboard.putData("Field", field);
+
+        PathPlannerLogging.setLogActivePathCallback((poses)-> {
+            field.getObject("path").setPoses(poses);
+        } );
     }
 
     public Rotation2d getHeadingDegrees(){
@@ -99,6 +107,10 @@ public class Swerve extends SubsystemBase {
         SmartDashboard.putNumber("SwerveCommandX", speeds.vyMetersPerSecond);
         SmartDashboard.putNumber("SwerveCommandY", speeds.vxMetersPerSecond);
         SmartDashboard.putNumber("SwerveCommandRot", speeds.omegaRadiansPerSecond);
+        double currentHeading = getHeadingDegrees().getDegrees();
+        if(speeds.omegaRadiansPerSecond ==0){
+
+        }
 
         SwerveModuleState[] swerveModuleStates = kinematics.toSwerveModuleStates(speeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, RobotMap.ATTAINBLE_MAX_SPEED_MPS_SWERVE);
@@ -169,5 +181,13 @@ public class Swerve extends SubsystemBase {
                 .voltage(frontRight.getOutputVoltage())
                 .linearPosition(Meters.of(frontRight.getPositionMeters()))
                 .linearVelocity(frontRight.getLinearVelocity());
+    }
+
+    public void resetOdometeryToStart() {
+        odometry.resetPosition(
+                getHeadingDegrees(),
+                getModulesPosition(),
+                new Pose2d(0, 0, Rotation2d.fromDegrees(0))
+        );
     }
 }
