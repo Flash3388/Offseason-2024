@@ -54,7 +54,6 @@ public class Swerve extends SubsystemBase {
         SmartDashboard.putData("Field", field);
         robotPose = new Pose2d();
         swerveDrivePoseEstimator = new SwerveDrivePoseEstimator(kinematics,getHeadingDegrees(),getModulesPosition(),robotPose);
-        swerveDrivePoseEstimator.addVisionMeasurement(robotPose,Timer.getFPGATimestamp());
     }
 
     public Rotation2d getHeadingDegrees(){
@@ -98,11 +97,12 @@ public class Swerve extends SubsystemBase {
     public double getDistancePassedMetersRight(){return ((-swerveModules[1].getDistancePassedMeters()+(-swerveModules[3].getDistancePassedMeters())/2));}
     public double getDistancePassedMetersRight2(){return (-swerveModules[1].getDistancePassedMeters());}
     public void updatePoseEstimatorByVision(Pose2d robotPose){
-        this.robotPose=this.swerveDrivePoseEstimator.updateWithTime(Timer.getFPGATimestamp(),getHeadingDegrees(),getModulesPosition());
-            setRobotPoseField(this.robotPose);
+        swerveDrivePoseEstimator.addVisionMeasurement(robotPose,Timer.getFPGATimestamp());
+        this.robotPose=robotPose;
+        setRobotPoseField(this.robotPose);
     }
     public void updatePoseEstimator(){
-      this.robotPose=this.swerveDrivePoseEstimator.updateWithTime(Timer.getFPGATimestamp(),getHeadingDegrees(),getModulesPosition());
+        this.robotPose=this.swerveDrivePoseEstimator.updateWithTime(Timer.getFPGATimestamp(),getHeadingDegrees(),getModulesPosition());
         setRobotPoseField(robotPose);
     }
     public void setRobotPoseField(Pose2d robotPoseField){field.setRobotPose(robotPoseField);}

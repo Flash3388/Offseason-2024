@@ -1,25 +1,14 @@
 package frc.robot;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import com.pathplanner.lib.commands.FollowPathHolonomic;
-import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-import com.pathplanner.lib.util.PIDConstants;
-import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
-
-import java.util.Optional;
 
 public class Robot extends TimedRobot {
 
@@ -150,16 +139,18 @@ public class Robot extends TimedRobot {
     @Override
     public void robotPeriodic() {
         double distance;
-        if(limelightBanana.targetIsSeen()){             //create a function
-           swerve.updatePoseEstimatorByVision(limelightBanana.getPose2dBlue());
-           distance = limelightBanana.distanceWithVision();
+        if(limelightBanana.targetIsSeen()){
+            distance = limelightBanana.distanceWithVision();
+            if(limelightBanana.changePipeLine(distance)) {
+                swerve.updatePoseEstimatorByVision(limelightBanana.getPose2dBlue());
+            }
             SmartDashboard.putNumber("distance with vision", distance);
         }else {
             distance = limelightBanana.distanceWithoutVision();
             this.swerve.updatePoseEstimator();
             SmartDashboard.putNumber("distance with id", distance);
         }
-        this.limelightBanana.PrintAll();
+        //this.limelightBanana.PrintAll();
         //this.swerve.setRobotPoseField(new Pose2d(4.3,6.1,new Rotation2d(0)));
         this.swerve.periodic();
        /* double distance = Math.sqrt(
