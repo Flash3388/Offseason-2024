@@ -105,7 +105,7 @@ public class Robot extends TimedRobot {
                 .onTrue(Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_CLIMB_ANGLE)));
 
 
-        SmartDashboard.putNumber("Distance", 0);
+        /*SmartDashboard.putNumber("Distance", 0);
         new JoystickButton(xboxController, XboxController.Button.kStart.value).onTrue(new DeferredCommand(()-> {
             double distance = SmartDashboard.getNumber("Distance", 0);
             double angle = arm.calculateFiringAngleDegrees(distance);
@@ -124,10 +124,10 @@ public class Robot extends TimedRobot {
                     )
 
             );
-        }, Set.of(shooter, swerve, intake)));
+        }, Set.of(shooter, swerve, intake)));*/
 
-        /*new JoystickButton(xboxController, XboxController.Button.kStart.value).onTrue(new DeferredCommand(()-> {
-            TargetInfo targetInfo = swerve.getTargetInfoFromCurrentPos(fakeTarget);
+        new JoystickButton(xboxController, XboxController.Button.kStart.value).onTrue(new DeferredCommand(()-> {
+            TargetInfo targetInfo = swerve.getTargetInfoFromCurrentPos(FieldInfo.getOurSpeakerPose());
             double angle = arm.calculateFiringAngleDegrees(targetInfo.getDistance());
 
             SmartDashboard.putNumber("FakeTargetStart", swerve.getHeadingDegrees().getDegrees());
@@ -135,7 +135,7 @@ public class Robot extends TimedRobot {
             SmartDashboard.putNumber("FakeTargetAngleToHit", angle);
 
             return new SequentialCommandGroup(
-                    new RotateToAngle(swerve, targetInfo.getAngle()),
+                   // new RotateToAngle(swerve, targetInfo.getAngle()),
                     Commands.runOnce(() -> armCommand.changeTarget(angle)),
                     Commands.waitUntil(() -> armCommand.didReachTarget()),
                     new ParallelCommandGroup(
@@ -144,7 +144,7 @@ public class Robot extends TimedRobot {
                     )
 
             );
-        }, Collections.emptySet()));*/
+        }, Set.of(shooter, swerve, intake)));
     }
 
     @Override

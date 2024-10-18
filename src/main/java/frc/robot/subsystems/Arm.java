@@ -22,7 +22,7 @@ public class Arm extends SubsystemBase {
     private static final int POSITION_PID_SLOT = 0;
     private static final double HIGH_CURRENT_TO_WARN = 40;
     private static final double HIGH_TEMPERATURE_TO_WARN = 70;
-    private static final double DISTANCE_FROM_LIMELIGHT = 0.225;
+    private static final double DISTANCE_FROM_LIMELIGHT = 0.35;
 
     private final CANSparkMax followerMotor;
     private final CANSparkMax masterMotor;

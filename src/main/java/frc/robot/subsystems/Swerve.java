@@ -166,7 +166,7 @@ public class Swerve extends SubsystemBase {
     }
 
     public TargetInfo getTargetInfoFromCurrentPos(Pose2d other) {
-        Pose2d pose = odometry.getPoseMeters();
+        Pose2d pose = getPose();
         return getTargetInfo(pose, other);
     }
 
