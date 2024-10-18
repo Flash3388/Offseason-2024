@@ -90,6 +90,10 @@ public class Swerve extends SubsystemBase {
         return kinematics.toChassisSpeeds(new SwerveDriveKinematics.SwerveDriveWheelStates(getModuleStates()));
     }
 
+    public Pose2d getPose() {
+        return swerveDrivePoseEstimator.getEstimatedPosition();
+    }
+
     public void updatePoseEstimatorByVision(Pose2d estimatedRobotPose, double timestamp) {
         swerveDrivePoseEstimator.addVisionMeasurement(estimatedRobotPose, timestamp);
     }

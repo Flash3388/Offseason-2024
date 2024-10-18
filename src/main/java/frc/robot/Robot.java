@@ -45,6 +45,7 @@ public class Robot extends TimedRobot {
     private Shooter shooter;
     private Intake intake;
     private Arm arm;
+    private LimelightBanana limelight;
     private XboxController xboxController;
 
     private ArmCommand armCommand;
@@ -59,6 +60,7 @@ public class Robot extends TimedRobot {
         this.shooter = new Shooter();
         this.intake = new Intake();
         this.arm = new Arm();
+        limelight = new LimelightBanana(swerve);
 
         this.xboxController = new XboxController(0);
 
