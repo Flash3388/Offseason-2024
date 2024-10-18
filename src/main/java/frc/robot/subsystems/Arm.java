@@ -2,7 +2,10 @@ package frc.robot.subsystems;
 
 import com.revrobotics.*;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunctionLagrangeForm;
@@ -30,6 +33,8 @@ public class Arm extends SubsystemBase {
     private final SparkPIDController pidController;
     private final AbsoluteEncoder absoluteEncoder;
     private final RelativeEncoder relativeEncoder;
+
+    private boolean didReportEncoderError;
 
     private static final double[] FIRING_X = {
             1 + DISTANCE_FROM_LIMELIGHT,
@@ -101,6 +106,9 @@ public class Arm extends SubsystemBase {
         exitBrake();
 
         firingFunction = new PolynomialFunctionLagrangeForm(FIRING_X, FIRING_Y);
+        didReportEncoderError = false;
+
+        SmartDashboard.putData("ArmExitBrake", Commands.runOnce(this::exitBrake));
     }
 
     public void move(double speed) {
@@ -185,5 +193,16 @@ public class Arm extends SubsystemBase {
 
         boolean shouldWarnTemp = tempMaster > HIGH_TEMPERATURE_TO_WARN || tempFollower > HIGH_TEMPERATURE_TO_WARN;
         SmartDashboard.putBoolean("ArmHighMotorTemp", shouldWarnTemp);
+
+        boolean hasEncoderError = getAngleDegrees() == 0;
+        SmartDashboard.putBoolean("ArmEncoderError", hasEncoderError);
+
+        if (hasEncoderError && !didReportEncoderError) {
+            didReportEncoderError = true;
+            DriverStation.reportError("Arm encoder reporting 0 position, possibly not connected", false);
+        } else if (!hasEncoderError && didReportEncoderError) {
+            didReportEncoderError = false;
+            DriverStation.reportError("Arm encoder now reporting good position", false);
+        }
     }
 }
