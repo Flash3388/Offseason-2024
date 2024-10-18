@@ -124,13 +124,18 @@ public class Arm extends SubsystemBase {
     public void move(double speed) {
         masterMotor.set(speed);
     }
+
     public double calculateFiringAngleDegrees(double distanceMeters) {
-        if (distanceMeters < MIN_FIRING_DISTANCE || distanceMeters > MAX_FIRING_DISTANCE) {
+        if (!isInRangeForAutoShoot(distanceMeters)) {
             return -1;
         }
+
         return firingFunction.value(distanceMeters);
     }
 
+    public boolean isInRangeForAutoShoot(double distanceMeters) {
+        return distanceMeters >= MIN_FIRING_DISTANCE && distanceMeters <= MAX_FIRING_DISTANCE;
+    }
 
     public void setMoveToPosition(double positionDegrees) {
         // filter out noise by just looking at the integer component, this is fine, and we don't need
