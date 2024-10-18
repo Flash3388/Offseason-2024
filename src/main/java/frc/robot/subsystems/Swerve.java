@@ -45,7 +45,7 @@ public class Swerve extends SubsystemBase {
         pigeon = new Pigeon2(RobotMap.PIGEON);
         pigeon.setYaw(0);
         odometry = new SwerveDriveOdometry(kinematics, getHeadingDegrees(), getModulesPosition());
-        rotationPID = new PIDController();
+        rotationPID = new PIDController(RobotMap.ROTATION_FIX_KP,RobotMap.ROTATION_FIX_KI,RobotMap.ROTATION_FIX_KD);
         field = new Field2d();
         SmartDashboard.putData("Field", field);
 
@@ -107,9 +107,12 @@ public class Swerve extends SubsystemBase {
         SmartDashboard.putNumber("SwerveCommandX", speeds.vyMetersPerSecond);
         SmartDashboard.putNumber("SwerveCommandY", speeds.vxMetersPerSecond);
         SmartDashboard.putNumber("SwerveCommandRot", speeds.omegaRadiansPerSecond);
-        double currentHeading = getHeadingDegrees().getDegrees();
         if(speeds.omegaRadiansPerSecond ==0){
-
+            double currentHeading = getHeadingDegrees().getDegrees();
+            if(getHeadingDegrees().getDegrees() > currentHeading+1.5 || getHeadingDegrees().getDegrees() < currentHeading -1.5){
+                double newRot = rotationPID.calculate(getHeadingDegrees().getDegrees(),currentHeading);
+                speeds = new ChassisSpeeds(speeds.vxMetersPerSecond,speeds.vyMetersPerSecond,newRot);
+            }
         }
 
         SwerveModuleState[] swerveModuleStates = kinematics.toSwerveModuleStates(speeds);
