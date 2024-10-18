@@ -46,7 +46,12 @@ public class Arm extends SubsystemBase {
             2.2 + DISTANCE_FROM_LIMELIGHT,
             2.35 + DISTANCE_FROM_LIMELIGHT,
             2.5 + DISTANCE_FROM_LIMELIGHT,
-            2.6 + DISTANCE_FROM_LIMELIGHT
+            2.6 + DISTANCE_FROM_LIMELIGHT,
+            2.8 + DISTANCE_FROM_LIMELIGHT,
+            3.2 + DISTANCE_FROM_LIMELIGHT,
+            3.5 + DISTANCE_FROM_LIMELIGHT,
+            3.7 + DISTANCE_FROM_LIMELIGHT,
+            3.9 + DISTANCE_FROM_LIMELIGHT
     };
     private static final double[] FIRING_Y = {
             43,
@@ -58,11 +63,16 @@ public class Arm extends SubsystemBase {
             56,
             57,
             58,
-            60
+            60,
+            60.5,
+            61,
+            61.7,
+            63,
+            65
     };
 
-    private static final double MIN_FIRING_DISTANCE = 1;
-    private static final double MAX_FIRING_DISTANCE = 3;
+    private static final double MIN_FIRING_DISTANCE = 1 + DISTANCE_FROM_LIMELIGHT;
+    private static final double MAX_FIRING_DISTANCE = 3.5 + DISTANCE_FROM_LIMELIGHT;
 
     private final PolynomialFunctionLagrangeForm firingFunction;
 

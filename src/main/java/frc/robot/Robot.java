@@ -133,7 +133,11 @@ public class Robot extends TimedRobot {
             SmartDashboard.putNumber("FakeTargetStart", swerve.getHeadingDegrees().getDegrees());
             SmartDashboard.putNumber("FakeTargetAngle", targetInfo.getAngle());
             SmartDashboard.putNumber("FakeTargetAngleToHit", angle);
+            SmartDashboard.putNumber("FakeTagetDistance", targetInfo.getDistance());
 
+            if(angle < 0){
+                return null;
+            }
             return new SequentialCommandGroup(
                    // new RotateToAngle(swerve, targetInfo.getAngle()),
                     Commands.runOnce(() -> armCommand.changeTarget(angle)),

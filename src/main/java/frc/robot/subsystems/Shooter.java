@@ -26,7 +26,7 @@ public class Shooter extends SubsystemBase {
         motorRight.restoreFactoryDefaults();
         motorLeft.restoreFactoryDefaults();
 
-       motorRight.setInverted(true);
+        motorRight.setInverted(true);
         motorLeft.setInverted(true);
 
         pidControllerRight = motorRight.getPIDController();
@@ -89,6 +89,8 @@ public class Shooter extends SubsystemBase {
     public void periodic() {
         SmartDashboard.putNumber("velocity right", getVelocityRight());
         SmartDashboard.putNumber("velocity left", getVelocityLeft());
+        SmartDashboard.putNumber("motorLeftOutput", motorLeft.getAppliedOutput());
+        SmartDashboard.putNumber("motorRightOutput", motorRight.getAppliedOutput());
     }
 
     public boolean isAtRangePIDRight(double speed) {

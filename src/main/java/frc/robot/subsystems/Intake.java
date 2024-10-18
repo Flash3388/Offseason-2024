@@ -48,7 +48,7 @@ public class Intake extends SubsystemBase {
     }
 
     public boolean hasBall() {
-        return (getLeft() || getRight());
+        return (getRight());
     }
 
     @Override
