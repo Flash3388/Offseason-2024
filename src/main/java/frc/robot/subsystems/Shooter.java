@@ -17,14 +17,7 @@ public class Shooter extends SubsystemBase {
     public static double TOLERANCE = 150;
     private static double KF = 0.000185;
 
-    private static final double[] FIRING_X = {6.75,7.75,5.75
 
-    };
-    private static final double[] FIRING_Y = {2550,2650,2250
-
-    };
-
-    private PolynomialFunctionLagrangeForm firingFunction;
 
     public Shooter() {
         motorRight = new CANSparkMax(RobotMap.SHOOTER_MOTOR_RIGHT, CANSparkLowLevel.MotorType.kBrushless);
@@ -39,14 +32,14 @@ public class Shooter extends SubsystemBase {
         pidControllerRight = motorRight.getPIDController();
         pidControllerLeft = motorLeft.getPIDController();
 
-        pidControllerRight.setP(RobotMap.SHOOTER_RIGHT_KP1);
+        pidControllerRight.setP(RobotMap.SHOOTER_RIGHT_KP);
         pidControllerRight.setI(0);
         pidControllerRight.setD(0);
-        pidControllerLeft.setP(RobotMap.SHOOTER_LEFT_KP1);
+        pidControllerLeft.setP(RobotMap.SHOOTER_LEFT_KP);
         pidControllerLeft.setI(0);
         pidControllerLeft.setD(0);
-        pidControllerRight.setFF(RobotMap.SHOOTER_RIGHT_KP2);
-        pidControllerLeft.setFF(RobotMap.SHOOTER_LEFT_KP2);
+        pidControllerRight.setFF(RobotMap.SHOOTER_RIGHT_KF);
+        pidControllerLeft.setFF(RobotMap.SHOOTER_LEFT_KF);
 
         pidControllerRight.setOutputRange(-1, 1);
         pidControllerLeft.setOutputRange(-1, 1);
@@ -57,7 +50,7 @@ public class Shooter extends SubsystemBase {
         motorRight.setIdleMode(CANSparkBase.IdleMode.kCoast);
         motorLeft.setIdleMode(CANSparkBase.IdleMode.kCoast);
 
-        firingFunction = new PolynomialFunctionLagrangeForm(FIRING_X, FIRING_Y);
+
 
         SmartDashboard.putNumber("KF Shooter", KF);
     }
@@ -91,9 +84,6 @@ public class Shooter extends SubsystemBase {
         pidControllerLeft.setIAccum(0);
     }
 
-    public double calculateFiringSpeedRpm(double distanceMeters) {
-        return firingFunction.value(distanceMeters);
-    }
 
     @Override
     public void periodic() {

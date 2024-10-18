@@ -2,10 +2,10 @@ package frc.robot.subsystems;
 
 import com.revrobotics.*;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
+import org.apache.commons.math3.analysis.polynomials.PolynomialFunctionLagrangeForm;
 
 public class Arm extends SubsystemBase {
 
@@ -29,6 +29,35 @@ public class Arm extends SubsystemBase {
     private final SparkPIDController pidController;
     private final AbsoluteEncoder absoluteEncoder;
     private final RelativeEncoder relativeEncoder;
+    private static final double[] FIRING_X = {
+            1,
+            1.1,
+            1.5,
+            1.7,
+            1.9,
+            2.05,
+            2.2,
+            2.35,
+            2.5,
+            2.6
+    };
+    private static final double[] FIRING_Y = {
+            43,
+            44,
+            48,
+            50,
+            52,
+            54,
+            56,
+            57,
+            58,
+            60
+    };
+
+    private static final double MIN_FIRING_DISTANCE = 1;
+    private static final double MAX_FIRING_DISTANCE = 3;
+
+    private final PolynomialFunctionLagrangeForm firingFunction;
 
     public Arm() {
         followerMotor = new CANSparkMax(RobotMap.ARM_FOLLOW, CANSparkLowLevel.MotorType.kBrushless);
@@ -68,11 +97,20 @@ public class Arm extends SubsystemBase {
         masterMotor.setSoftLimit(CANSparkBase.SoftLimitDirection.kReverse, (float) RobotMap.ARM_FLOOR_ANGLE);
 
         exitBrake();
+
+        firingFunction = new PolynomialFunctionLagrangeForm(FIRING_X, FIRING_Y);
     }
 
     public void move(double speed) {
         masterMotor.set(speed);
     }
+    public double calculateFiringAngleDegrees(double distanceMeters) {
+        if (distanceMeters < MIN_FIRING_DISTANCE || distanceMeters > MAX_FIRING_DISTANCE) {
+            return -1;
+        }
+        return firingFunction.value(distanceMeters);
+    }
+
 
     public void setMoveToPosition(double positionDegrees) {
         // filter out noise by just looking at the integer component, this is fine, and we don't need

@@ -23,6 +23,8 @@ import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.commands.*;
 
 import java.util.Collections;
+import java.util.Set;
+
 import frc.robot.commands.ArmCommand;
 import frc.robot.commands.DriveWithXBox;
 import frc.robot.commands.ForwardNote;
@@ -91,29 +93,47 @@ public class Robot extends TimedRobot {
         new JoystickButton(xboxController, XboxController.Button.kLeftBumper.value)
                 .onTrue(Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_CLIMB_ANGLE)));
 
-/*
-        new JoystickButton(xboxController, XboxController.Button.kStart.value).onTrue(new DeferredCommand(()-> {
-            TargetInfo targetInfo = swerve.getTargetInfoFromCurrentPos(fakeTarget);
-            double speed = shooter.calculateFiringSpeedRpm(targetInfo.getDistance());
 
-            SmartDashboard.putNumber("FakeTargetStart", swerve.getHeadingDegrees().getDegrees());
-            SmartDashboard.putNumber("FakeTargetAngle", targetInfo.getAngle());
-            SmartDashboard.putNumber("FakeTargetSpeedToHit", speed);
+        SmartDashboard.putNumber("Distance", 0);
+        new JoystickButton(xboxController, XboxController.Button.kStart.value).onTrue(new DeferredCommand(()-> {
+            double distance = SmartDashboard.getNumber("Distance", 0);
+            double angle = arm.calculateFiringAngleDegrees(distance);
+            if (angle < 0) {
+                return null;
+            }
+
+            SmartDashboard.putNumber("FakeTargetAngleToHit", angle);
 
             return new SequentialCommandGroup(
-                    new RotateToAngle(swerve, targetInfo.getAngle()),
-                    Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_SPEAKER_ANGLE)),
+                    Commands.runOnce(() -> armCommand.changeTarget(angle)),
                     Commands.waitUntil(() -> armCommand.didReachTarget()),
                     new ParallelCommandGroup(
-                            new ForwardNote(shooter, intake, speed),
-                            new ShooterSpeakerSpeed(shooter, intake, speed)
+                            new ForwardNote(shooter, intake, RobotMap.SHOOTER_SPEED_SPEAKER),
+                            new ShooterSpeakerSpeed(shooter, intake, RobotMap.SHOOTER_SPEED_SPEAKER)
                     )
 
             );
-        }, Collections.emptySet()));
+        }, Set.of(shooter, swerve, intake)));
 
- */
+        /*new JoystickButton(xboxController, XboxController.Button.kStart.value).onTrue(new DeferredCommand(()-> {
+            TargetInfo targetInfo = swerve.getTargetInfoFromCurrentPos(fakeTarget);
+            double angle = arm.calculateFiringAngleDegrees(targetInfo.getDistance());
 
+            SmartDashboard.putNumber("FakeTargetStart", swerve.getHeadingDegrees().getDegrees());
+            SmartDashboard.putNumber("FakeTargetAngle", targetInfo.getAngle());
+            SmartDashboard.putNumber("FakeTargetAngleToHit", angle);
+
+            return new SequentialCommandGroup(
+                    new RotateToAngle(swerve, targetInfo.getAngle()),
+                    Commands.runOnce(() -> armCommand.changeTarget(angle)),
+                    Commands.waitUntil(() -> armCommand.didReachTarget()),
+                    new ParallelCommandGroup(
+                            new ForwardNote(shooter, intake, RobotMap.SHOOTER_SPEED_SPEAKER),
+                            new ShooterSpeakerSpeed(shooter, intake, RobotMap.SHOOTER_SPEED_SPEAKER)
+                    )
+
+            );
+        }, Collections.emptySet()));*/
     }
 
     @Override
