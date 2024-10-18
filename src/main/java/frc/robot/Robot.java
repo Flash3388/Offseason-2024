@@ -139,15 +139,10 @@ public class Robot extends TimedRobot {
     @Override
     public void robotPeriodic() {
         double distance;
-        if(limelightBanana.targetIsSeen()){
             distance = limelightBanana.distanceWithVision();
-            if(limelightBanana.changePipeLine(distance)) {
-                swerve.updatePoseEstimatorByVision(limelightBanana.getPose2dBlue());
-            }
             SmartDashboard.putNumber("distance with vision", distance);
-        }else {
+        else {
             distance = limelightBanana.distanceWithoutVision();
-            this.swerve.updatePoseEstimator();
             SmartDashboard.putNumber("distance with id", distance);
         }
         //this.limelightBanana.PrintAll();

@@ -51,7 +51,6 @@ public class LimelightBanana {
             id=13;
         }
         //id = (int) LimelightHelpers.getFiducialID("limelight-banana");
-
         Optional<Pose3d> tagPoseOptional = layout.getTagPose(id);
         if(tagPoseOptional.isEmpty()){                    //not found
             return 0;
@@ -61,6 +60,7 @@ public class LimelightBanana {
         distance = Math.sqrt(
                 Math.pow(tagPose.getX()-robotPose.getX(),2)
                         +Math.pow(tagPose.getY()-robotPose.getY(),2));
+        this.swerve.updatePoseEstimator();
 
         return distance;
     }
@@ -94,13 +94,16 @@ public class LimelightBanana {
       double distance = Math.sqrt(
                 Math.pow(apriltagPose.getX()-robotPose.getX(),2)
                         +Math.pow(apriltagPose.getY()-robotPose.getY(),2));
+      SmartDashboard.putBoolean("ready to shoot", distance<=4.5);
       return distance<=4.5;
     }
     public double distanceWithVision(){
+        if(!targetIsSeen()) return 0;
         double distance = 0.0;
         int id;
 
         id = (int) LimelightHelpers.getFiducialID("limelight-banana");
+
 
         Optional<Pose3d> tagPoseOptional = layout.getTagPose(id);
         if(tagPoseOptional.isEmpty()){                    //not found
@@ -111,6 +114,9 @@ public class LimelightBanana {
         distance = Math.sqrt(
                 Math.pow(tagPose.getX()-robotPose.getX(),2)
                             +Math.pow(tagPose.getY()-robotPose.getY(),2));
+        if(changePipeLine(distance)) {
+            swerve.updatePoseEstimatorByVision(getPose2dBlue());
+        }
         return distance;
     }
     public double getXAngleToTarget_Speaker() {// for speaker
