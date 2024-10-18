@@ -138,23 +138,8 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
-        double distance;
-        distance = limelightBanana.distanceWithVision();
-        SmartDashboard.putNumber("distance with vision", distance);
-        distance = limelightBanana.distanceWithoutVision();
-        SmartDashboard.putNumber("distance with id", distance);
-
-        //this.limelightBanana.PrintAll();
-        //this.swerve.setRobotPoseField(new Pose2d(4.3,6.1,new Rotation2d(0)));
+        this.limelightBanana.periodic();
         this.swerve.periodic();
-       /* double distance = Math.sqrt(
-                Math.pow(robotPoseTargetSpace[0],2)+
-                        Math.pow(robotPoseTargetSpace[1],2)+
-                        Math.pow(robotPoseTargetSpace[2],2)
-        );
-        */
-
-
         CommandScheduler.getInstance().run();
     }
 

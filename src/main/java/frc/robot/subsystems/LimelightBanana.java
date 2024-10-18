@@ -185,4 +185,13 @@ public class LimelightBanana {
       //SmartDashboard.putNumber("distance2",NetworkTableInstance.getDefault().getTable("limelight-banana").getEntry("botpose").getDoubleArray(new double[6])[2]); //returns the z meters (height)
     //  SmartDashboard.putNumber("distance5",NetworkTableInstance.getDefault().getTable("limelight-banana").getEntry("botpose").getDoubleArray(new double[6])[5]); // returns the y angle from apriltag
     }
+    public void periodic(){
+        double distance;
+        distance =distanceWithVision();
+        SmartDashboard.putNumber("distance with vision", distance);
+        distance = distanceWithoutVision();
+        SmartDashboard.putNumber("distance with id", distance);
+
+        //this.limelightBanana.PrintAll();
+    }
 }
