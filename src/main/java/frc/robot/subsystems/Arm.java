@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
+import org.apache.commons.math3.analysis.polynomials.PolynomialFunctionLagrangeForm;
 
 public class Arm extends SubsystemBase {
 
@@ -21,6 +22,7 @@ public class Arm extends SubsystemBase {
     private static final int POSITION_PID_SLOT = 0;
     private static final double HIGH_CURRENT_TO_WARN = 40;
     private static final double HIGH_TEMPERATURE_TO_WARN = 70;
+    private static final double DISTANCE_FROM_LIMELIGHT = 0.35;
 
     private final CANSparkMax followerMotor;
     private final CANSparkMax masterMotor;
@@ -33,6 +35,46 @@ public class Arm extends SubsystemBase {
     private final RelativeEncoder relativeEncoder;
 
     private boolean didReportEncoderError;
+
+    private static final double[] FIRING_X = {
+            1 + DISTANCE_FROM_LIMELIGHT,
+            1.1 + DISTANCE_FROM_LIMELIGHT,
+            1.5 + DISTANCE_FROM_LIMELIGHT,
+            1.7 + DISTANCE_FROM_LIMELIGHT,
+            1.9 + DISTANCE_FROM_LIMELIGHT,
+            2.05 + DISTANCE_FROM_LIMELIGHT,
+            2.2 + DISTANCE_FROM_LIMELIGHT,
+            2.35 + DISTANCE_FROM_LIMELIGHT,
+            2.5 + DISTANCE_FROM_LIMELIGHT,
+            2.6 + DISTANCE_FROM_LIMELIGHT,
+            2.8 + DISTANCE_FROM_LIMELIGHT,
+            3.2 + DISTANCE_FROM_LIMELIGHT,
+            3.5 + DISTANCE_FROM_LIMELIGHT,
+            3.7 + DISTANCE_FROM_LIMELIGHT,
+            3.9 + DISTANCE_FROM_LIMELIGHT
+    };
+    private static final double[] FIRING_Y = {
+            43,
+            44,
+            48,
+            50,
+            52,
+            54,
+            56,
+            57,
+            58,
+            60,
+            60.5,
+            61,
+            61.7,
+            63,
+            65
+    };
+
+    private static final double MIN_FIRING_DISTANCE = 1 + DISTANCE_FROM_LIMELIGHT;
+    private static final double MAX_FIRING_DISTANCE = 3.5 + DISTANCE_FROM_LIMELIGHT;
+
+    private final PolynomialFunctionLagrangeForm firingFunction;
 
     public Arm() {
         followerMotor = new CANSparkMax(RobotMap.ARM_FOLLOW, CANSparkLowLevel.MotorType.kBrushless);
@@ -72,6 +114,8 @@ public class Arm extends SubsystemBase {
         masterMotor.setSoftLimit(CANSparkBase.SoftLimitDirection.kReverse, (float) RobotMap.ARM_FLOOR_ANGLE);
 
         exitBrake();
+
+        firingFunction = new PolynomialFunctionLagrangeForm(FIRING_X, FIRING_Y);
         didReportEncoderError = false;
 
         SmartDashboard.putData("ArmExitBrake", Commands.runOnce(this::exitBrake));
@@ -79,6 +123,18 @@ public class Arm extends SubsystemBase {
 
     public void move(double speed) {
         masterMotor.set(speed);
+    }
+
+    public double calculateFiringAngleDegrees(double distanceMeters) {
+        if (!isInRangeForAutoShoot(distanceMeters)) {
+            return -1;
+        }
+
+        return firingFunction.value(distanceMeters);
+    }
+
+    public boolean isInRangeForAutoShoot(double distanceMeters) {
+        return distanceMeters >= MIN_FIRING_DISTANCE && distanceMeters <= MAX_FIRING_DISTANCE;
     }
 
     public void setMoveToPosition(double positionDegrees) {
