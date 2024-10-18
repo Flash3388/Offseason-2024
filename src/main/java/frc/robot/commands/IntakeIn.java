@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Intake;
 
@@ -26,6 +27,10 @@ public class IntakeIn extends Command {
     @Override
     public void end(boolean interrupted) {
         intake.stop();
+
+        if (!interrupted) {
+            DriverStation.reportWarning("has ball man!", false);
+        }
     }
 
     @Override

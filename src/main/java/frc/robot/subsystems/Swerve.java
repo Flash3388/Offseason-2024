@@ -103,19 +103,15 @@ public class Swerve extends SubsystemBase {
     }
 
     public void drive(double speedX, double speedY, double rotation) {
-        SmartDashboard.putNumber("SwerveCommandX", speedX);
-        SmartDashboard.putNumber("SwerveCommandY", speedY);
-        SmartDashboard.putNumber("SwerveCommandRot", rotation);
-
-        SwerveModuleState[] swerveModuleStates;
-        swerveModuleStates = kinematics.toSwerveModuleStates(new ChassisSpeeds(speedY, speedX, rotation));
-        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, RobotMap.ATTAINBLE_MAX_SPEED_MPS_SWERVE);
-        setDesiredState(swerveModuleStates);
+        drive(new ChassisSpeeds(speedY, speedX, rotation));
     }
 
     public void drive(ChassisSpeeds speeds) {
-        SwerveModuleState[] swerveModuleStates;
-        swerveModuleStates = kinematics.toSwerveModuleStates(speeds);
+        SmartDashboard.putNumber("SwerveCommandX", speeds.vyMetersPerSecond);
+        SmartDashboard.putNumber("SwerveCommandY", speeds.vxMetersPerSecond);
+        SmartDashboard.putNumber("SwerveCommandRot", speeds.omegaRadiansPerSecond);
+
+        SwerveModuleState[] swerveModuleStates = kinematics.toSwerveModuleStates(speeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, RobotMap.ATTAINBLE_MAX_SPEED_MPS_SWERVE);
         setDesiredState(swerveModuleStates);
     }

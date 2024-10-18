@@ -491,15 +491,16 @@ General checklist of changes:
 - Added basic tuning values
 
 Todo wedensday:
-- Delete old arm commands as they are not wanted anymore.
-- Add soft limits on both motors. This is a basic replacement to the hardware limit switches and uses the NEO encoder to define forward/reverse limits to the SparkMaxs. Test this in REV Hardware Client and then configure in code.
+- [x] Delete old arm commands as they are not wanted anymore.
+- [x] Add soft limits on both motors. This is a basic replacement to the hardware limit switches and uses the NEO encoder to define forward/reverse limits to the SparkMaxs. Test this in REV Hardware Client and then configure in code.
     - Due to the need for absolute encoder calibration for the relative encoders, in code, configure the relative encoders according to the absolute encoder positioning and configure soft limits according to that.
+        - no true in the end, uses the absolute encoder (for some reason) 
     - These limits will stay even when hard limits are returned as backups
     - Read
         - [enableSoftLimit](https://codedocs.revrobotics.com/java/com/revrobotics/cansparkbase#enableSoftLimit(com.revrobotics.CANSparkBase.SoftLimitDirection,boolean))
         - [setSoftLimit](https://codedocs.revrobotics.com/java/com/revrobotics/cansparkbase#setSoftLimit(com.revrobotics.CANSparkBase.SoftLimitDirection,float))
         - [Example](https://github.com/REVrobotics/SPARK-MAX-Examples/tree/master/Java/Soft%20Limits)
-- Add stop condition to arm command. We don't want to keep the arm in the air for too long. Use a timer which when elapsed, changes the command to a stop mode which stops the motor.
+- [x] Add stop condition to arm command. We don't want to keep the arm in the air for too long. Use a timer which when elapsed, changes the command to a stop mode which stops the motor.
     -  You may also integrate motor temperature into this instead of (or in additon to) timer. This will allow to stop when motors reach a critical temperature as a safety measure.
     -  You can either drop the arm completely (by stopping the motor) or move the arm to the floor and then stop.
 - Integrate Arm with other systems. We need to start integrating the arm with the operations of the other systems. This does not mean we are finished with the arm, but we are on a clock and the faster we integrate the faster we will be able to identify problems
@@ -509,6 +510,39 @@ Todo wedensday:
 
 Todo later:
 - Better tuning for the arm, to improve power consumption, blunt agressive movement
+- Drop to the floor gently when timer expires or when moving to the floor
+
+##### Progress Update: 30.9
+
+Took an opportunity to test the arm against several approaches and tunings. 
+- The position control in SparkMax is pretty good on its own.
+    - It's a bit violent going up and stopping suddently when reaching the setpoint
+    - It's very violent going down, as gravity increases the power suggnificantly
+    - Normally the arm raises it can reach up to around 1200 RPM speed
+    - When going down it can reach around 1500-2000 RPM
+    - This speed causes the arm to slam down with force
+    - This violent motion is damaging to the arm
+- Attempted to blunt this speed with several approaches
+    - adding some `kd` didn't have much affect, and too much `kd` causes oscillations due to sensor noise
+    - adding an arbitrary FF has the affect of increasing power for raising and decreases power for lowering
+        - however, we cannot raise this value to high as it will prevent capable raising
+        - up to a limit, it did had an affect, but not enough
+    - Using an FF based on a $cos(angle)$ function
+        - Unlike arbitrary FF, this has a changing FF value, which causes a nicer motion
+        - It also add the affect of providing better percision, because it provided more power to the motor
+        - But because it is not constant, then it doesn't alter the output too much such that it misses
+        - Additionally, because of a lower P need and limited FF value, the current drawn by the motor during stall is lower on average. This can be attributed to what the actual output voltage is.
+     - Using SmartMotion is problematic..... This was known in advance though
+        - SmartMotion combines motion profiling with the PIDF loop for position control
+        - HOWEVER, it was weirdly implemented via a velocity loop instead
+        - This makes tuning for an arm difficult, and very dangerous for our specific arm
+        - It showed good properties, since the velocity was very controlled and allowed us to limit it
+        - But tuning this is difficult
+
+The conclusion here is to combine the best of what we have:
+- use the Position control with SparkMax at the base
+- Add cosine based FF
+- Add motion profiling for velocity control
 
 ### Vision
 

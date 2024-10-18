@@ -3,71 +3,75 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.RobotMap;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 
 import java.sql.Time;
 
 public class ShooterAMP extends Command {
+    //Are we supposed to delete those comments?
     private final Shooter shooter;
     private final double speed;
     private final Intake intake;
     private final Timer timer;
-    private final Timer fullRunTimer;
+    //private final Timer fullRunTimer;
+    //private boolean timerStarted;
 
-    private boolean timerStarted;
-
-    public ShooterAMP(Shooter shooter, double speed, Intake intake) {
+    public ShooterAMP(Shooter shooter, Intake intake) {
         this.shooter = shooter;
-        this.speed = speed;
+        this.speed = RobotMap.SHOOTER_SPEED_AMP;
         this.intake = intake;
         this.timer = new Timer();
-        this.fullRunTimer = new Timer();
+        //this.fullRunTimer = new Timer();
 
-        addRequirements(shooter, intake);
+        addRequirements(shooter);
     }
 
     @Override
     public void initialize() {
         shooter.resetPid();
         timer.reset();
+        timer.start();
 
-        fullRunTimer.reset();
-        fullRunTimer.start();
+        //fullRunTimer.reset();
+        //fullRunTimer.start();
 
-        timerStarted = false;
+        //timerStarted = false;
     }
 
     @Override
     public void execute() {
         shooter.movePid(speed);
 
-        if (shooter.isAtRangePIDRight(speed) && shooter.isAtRangePIDLeft(speed)) {
-            intake.in();
-        }
-
-        if (!timerStarted && !intake.hasBall()) {
+        /*if (!timerStarted && !intake.hasBall()) {
             timerStarted = true;
             SmartDashboard.putNumber("TimeToNoBall", fullRunTimer.get());
             timer.start();
         }
+
+         */
     }
 
     @Override
     public void end(boolean interrupted) {
-        SmartDashboard.putNumber("TimeToEnd", fullRunTimer.get());
-
+        //SmartDashboard.putNumber("TimeToEnd", fullRunTimer.get());
         shooter.stop();
-        intake.stop();
         timer.stop();
-        fullRunTimer.stop();
+        //fullRunTimer.stop();
     }
 
     @Override
     public boolean isFinished() {
-        if (timer.hasElapsed(0.5)) {
-            return true;
+        if (intake.hasBall()) {
+            timer.restart();
+            return false;
         }
-        return false;
+        else{
+            if(timer.hasElapsed(1)){
+                return true;
+            }
+            return false;
+        }
     }
 }

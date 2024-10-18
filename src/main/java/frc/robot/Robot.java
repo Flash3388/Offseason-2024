@@ -1,9 +1,37 @@
 package frc.robot;
+
+import com.pathplanner.lib.commands.FollowPathHolonomic;
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.util.ReplanningConfig;
+import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.POVButton;
+import frc.robot.commands.ArmCommand;
+import frc.robot.commands.DriveWithXBox;
+import frc.robot.commands.ForwardNote;
+import frc.robot.commands.IntakeIn;
+import frc.robot.commands.IntakeOut;
+import frc.robot.commands.ShooterAMP;
+import frc.robot.commands.ShooterSpeaker;
+import frc.robot.subsystems.Arm;
+import frc.robot.subsystems.Climb;
+import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.Swerve;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.XboxController;
@@ -16,22 +44,26 @@ public class Robot extends TimedRobot {
     private Climb climb;
     private Shooter shooter;
     private Intake intake;
+    private Arm arm;
     private XboxController xboxController;
-    private LimelightBanana limelightBanana;
-    private LimelightHelpers limelightHelper;
-    private AprilTagFieldLayout layout;
-    private NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight-banana");
+
+    private ArmCommand armCommand;
+    private boolean shouldBrakeArm;
 
     @Override
     public void robotInit() {
+        DataLogManager.stop();
+
         this.swerve = SystemFactory.createSwerve();
-        this.limelightBanana = new LimelightBanana(this.swerve);
-      //  this.climb = new Climb();
-      //  this.shooter = new Shooter();
-      //  this.intake = new Intake();
-        table.getEntry("pipeline").setValue(1); //what is the value
+        this.climb = new Climb();
+        this.shooter = new Shooter();
+        this.intake = new Intake();
+        this.arm = new Arm();
 
         this.xboxController = new XboxController(0);
+
+        armCommand = new ArmCommand(arm);
+        arm.setDefaultCommand(armCommand);
 
         DriveWithXBox driveWithXBox = new DriveWithXBox(swerve, xboxController);
         swerve.setDefaultCommand(driveWithXBox);
@@ -40,61 +72,64 @@ public class Robot extends TimedRobot {
                 .onTrue(new UpAndDown(climb, true));
         new JoystickButton(xboxController, XboxController.Button.kB.value)
                 .onTrue(new UpAndDown(climb, false));
+        */
 
-        new JoystickButton(xboxController, XboxController.Button.kB.value)
-                .onTrue(new ShooterAMP(shooter, RobotMap.SHOOTER_SPEED_AMP, intake));
-        new JoystickButton(xboxController, XboxController.Button.kA.value)
-                .onTrue(new ShooterSpeaker(shooter, RobotMap.SHOOTER_SPEED_SPEAKER, intake));
-
-        new JoystickButton(xboxController, XboxController.Button.kY.value)
-                .onTrue(new IntakeIn(intake));
+        new JoystickButton(xboxController, XboxController.Button.kY.value).onTrue(shooterAMP());
+        new JoystickButton(xboxController, XboxController.Button.kB.value).onTrue(shooterSpeaker());
         new JoystickButton(xboxController, XboxController.Button.kX.value)
                 .whileTrue(new IntakeOut(intake));
-*/
-        robotPoseTargetSpace = LimelightHelpers.getCameraPose_TargetSpace("Limelight-banana");
-        layout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
+        new JoystickButton(xboxController, XboxController.Button.kA.value).onTrue(collectFromFloor());
+
+        new POVButton(xboxController, 0).onTrue(Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_AMP_ANGLE)));
+        new POVButton(xboxController, 180).onTrue(Commands.runOnce(() -> armCommand.gentlyDrop()));
+
+        SmartDashboard.putBoolean("ArmDisabledBrake", false);
     }
 
     @Override
     public void disabledInit() {
+        double armPosition = arm.getAngleDegrees();
+        shouldBrakeArm = armPosition >= RobotMap.ARM_ANGLE_BEFORE_STOP;
 
+        if (shouldBrakeArm) {
+            SmartDashboard.putBoolean("ArmDisabledBrake", true);
+            arm.enterBrake();
+        }
     }
 
     @Override
     public void disabledPeriodic() {
+        double armPosition = arm.getAngleDegrees();
+        if (shouldBrakeArm && armPosition <= RobotMap.ARM_FLOOR_ANGLE + 1) {
+            shouldBrakeArm = false;
+            SmartDashboard.putBoolean("ArmDisabledBrake", false);
 
+            arm.exitBrake();
+        }
     }
-    double[] robotPoseTargetSpace;
+
+    @Override
+    public void disabledExit() {
+        if (shouldBrakeArm) {
+            shouldBrakeArm = false;
+            SmartDashboard.putBoolean("ArmDisabledBrake", true);
+
+            arm.exitBrake();
+        }
+    }
 
     @Override
     public void teleopInit() {
-
+        armCommand.changeTarget(RobotMap.ARM_DEFAULT_ANGLE);
     }
 
     @Override
     public void teleopPeriodic() {
-        int id;
-        double distance;  //if needed is the id target-for example speaker id of blue alliance is 7
-        /*if(!LimelightHelpers.getTV("limelight-banana")){
-             id = (int) LimelightHelpers.getFiducialID("limelight-banana");
 
-            Optional<Pose3d> tagPoseOptional = layout.getTagPose(id);
-            if(tagPoseOptional.isEmpty()){                    //not found
-                return;
-            }
-            Pose3d tagPose = tagPoseOptional.get(); //if didn't check would crash
-            Pose2d robotPose = swerve.getRobotPose();
-             distance = Math.sqrt(
-                    Math.pow(tagPose.getX()-robotPose.getX(),2)
-                            +Math.pow(tagPose.getY()-robotPose.getY(),2));
-            SmartDashboard.putNumber("distance with id", distance);
-        }
-         */
     }
 
     @Override
     public void autonomousInit() {
-        /*
         ReplanningConfig replanningConfig = new ReplanningConfig(
                 false,
                 false);
@@ -117,8 +152,6 @@ public class Robot extends TimedRobot {
                 },
                 swerve);
         pathHolonomic.schedule();
-
-         */
     }
 
     @Override
@@ -138,13 +171,45 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
-        this.limelightBanana.periodic();
-        this.swerve.periodic();
         CommandScheduler.getInstance().run();
+
     }
 
     @Override
     public void simulationPeriodic() {
 
+    }
+
+    private Command shooterAMP() {
+        return new SequentialCommandGroup(
+                Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_AMP_ANGLE)),
+                Commands.waitUntil(() -> armCommand.didReachTarget()),
+                new ParallelCommandGroup(
+                        new ShooterAMP(shooter, intake),
+                        new ForwardNote(shooter, intake, false)
+                ),
+                Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_DEFAULT_ANGLE))
+        );
+    }
+
+    private Command shooterSpeaker() {
+        return new SequentialCommandGroup(
+                Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_SPEAKER_ANGLE)),
+                Commands.waitUntil(() -> armCommand.didReachTarget()),
+                new ParallelCommandGroup(
+                        new ShooterSpeaker(shooter, intake),
+                        new ForwardNote(shooter, intake, true)
+                ),
+                Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_DEFAULT_ANGLE))
+        );
+    }
+
+    private Command collectFromFloor() {
+        return new SequentialCommandGroup(
+                Commands.runOnce(() -> armCommand.gentlyDrop()),
+                Commands.waitUntil(() -> armCommand.didReachTarget()),
+                new IntakeIn(intake),
+                Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_DEFAULT_ANGLE))
+        );
     }
 }

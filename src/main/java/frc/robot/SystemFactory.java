@@ -1,6 +1,7 @@
 package frc.robot;
 
 
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.revrobotics.CANSparkLowLevel;
 import com.revrobotics.CANSparkMax;
@@ -31,14 +32,16 @@ public class SystemFactory {
     public static SwerveModule createInvertedModule(int drive, int steer, int encoder, double zeroAngle, String identifier) {
         CANSparkMax spark = new CANSparkMax(drive, CANSparkLowLevel.MotorType.kBrushless);
         spark.restoreFactoryDefaults();
-        spark.setInverted(true);
 
         CANSparkMax steerMotor = new CANSparkMax(steer, CANSparkLowLevel.MotorType.kBrushless);
         steerMotor.restoreFactoryDefaults();
 
+        CANcoder caNcoder = new CANcoder(encoder);
+        caNcoder.getConfigurator().apply(new CANcoderConfiguration());
+
         return new SwerveModule(spark,
                 steerMotor,
-                new CANcoder(encoder),
+                caNcoder,
                 zeroAngle,
                 identifier);
     }
