@@ -29,13 +29,11 @@ public class Swerve extends SubsystemBase {
 
 
     private final Pigeon2 pigeon;
-    private final SwerveDriveOdometry odometry;
     private final SwerveModule[] swerveModules;
     private final SwerveDriveKinematics kinematics;
     private final SysIdRoutine sysIdRoutine;
     private final Field2d field;
     private final SwerveDrivePoseEstimator swerveDrivePoseEstimator;
-    private Pose2d robotPose;
 
     public Swerve(SwerveModule[] swerveModules) {
         sysIdRoutine = new SysIdRoutine(new SysIdRoutine.Config(), new SysIdRoutine.Mechanism(this::volatageDrive, this::sysidLog, this));
@@ -49,11 +47,15 @@ public class Swerve extends SubsystemBase {
         );
         pigeon = new Pigeon2(RobotMap.PIGEON);
         pigeon.setYaw(0);
-        odometry = new SwerveDriveOdometry(kinematics, getHeadingDegrees(), getModulesPosition());
+
+        swerveDrivePoseEstimator = new SwerveDrivePoseEstimator(
+                kinematics,
+                getHeadingDegrees(),
+                getModulesPosition(),
+                new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
+
         field = new Field2d();
         SmartDashboard.putData("Field", field);
-        robotPose = new Pose2d();
-        swerveDrivePoseEstimator = new SwerveDrivePoseEstimator(kinematics,getHeadingDegrees(),getModulesPosition(),robotPose);
     }
 
     public Rotation2d getHeadingDegrees(){
@@ -64,10 +66,6 @@ public class Swerve extends SubsystemBase {
         }
 
         return Rotation2d.fromDegrees(degrees);
-    }
-
-    public Pose2d getPose() {
-        return odometry.getPoseMeters();
     }
 
     public SwerveModulePosition[] getModulesPosition() {
@@ -92,21 +90,9 @@ public class Swerve extends SubsystemBase {
         return kinematics.toChassisSpeeds(new SwerveDriveKinematics.SwerveDriveWheelStates(getModuleStates()));
     }
 
-    public double getDistancePassedMetersLeft(){return ((-swerveModules[0].getDistancePassedMeters()+(-swerveModules[2].getDistancePassedMeters())/2));}
-    public double getDistancePassedMetersLeft2(){return (-swerveModules[0].getDistancePassedMeters());}
-    public double getDistancePassedMetersRight(){return ((-swerveModules[1].getDistancePassedMeters()+(-swerveModules[3].getDistancePassedMeters())/2));}
-    public double getDistancePassedMetersRight2(){return (-swerveModules[1].getDistancePassedMeters());}
-    public void updatePoseEstimatorByVision(Pose2d robotPose){
-        swerveDrivePoseEstimator.addVisionMeasurement(robotPose,Timer.getFPGATimestamp());
-        this.robotPose=robotPose;
-        setRobotPoseField(this.robotPose);
+    public void updatePoseEstimatorByVision(Pose2d estimatedRobotPose, double timestamp) {
+        swerveDrivePoseEstimator.addVisionMeasurement(estimatedRobotPose, timestamp);
     }
-    public void updatePoseEstimator(){
-        this.robotPose=this.swerveDrivePoseEstimator.updateWithTime(Timer.getFPGATimestamp(),getHeadingDegrees(),getModulesPosition());
-        setRobotPoseField(robotPose);
-    }
-    public void setRobotPoseField(Pose2d robotPoseField){field.setRobotPose(robotPoseField);}
-    public Pose2d getRobotPose(){return robotPose;}
 
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
         return sysIdRoutine.quasistatic(direction);
@@ -181,8 +167,11 @@ public class Swerve extends SubsystemBase {
             swerveModules[i].periodic();
         }
 
-        //odometry.update(rotation, getModulesPosition());
-        //setRobotPoseField(odometry.getPoseMeters());
+        Pose2d robotPose = swerveDrivePoseEstimator.updateWithTime(
+                Timer.getFPGATimestamp(),
+                getHeadingDegrees(),
+                getModulesPosition());
+        field.setRobotPose(robotPose);
     }
 
     private void sysidLog(SysIdRoutineLog log) {
