@@ -19,6 +19,7 @@ public class Arm extends SubsystemBase {
     private static final int POSITION_PID_SLOT = 0;
     private static final double HIGH_CURRENT_TO_WARN = 40;
     private static final double HIGH_TEMPERATURE_TO_WARN = 70;
+    private static final double DISTANCE_FROM_LIMELIGHT = 0.225;
 
     private final CANSparkMax followerMotor;
     private final CANSparkMax masterMotor;
@@ -29,17 +30,18 @@ public class Arm extends SubsystemBase {
     private final SparkPIDController pidController;
     private final AbsoluteEncoder absoluteEncoder;
     private final RelativeEncoder relativeEncoder;
+
     private static final double[] FIRING_X = {
-            1,
-            1.1,
-            1.5,
-            1.7,
-            1.9,
-            2.05,
-            2.2,
-            2.35,
-            2.5,
-            2.6
+            1 + DISTANCE_FROM_LIMELIGHT,
+            1.1 + DISTANCE_FROM_LIMELIGHT,
+            1.5 + DISTANCE_FROM_LIMELIGHT,
+            1.7 + DISTANCE_FROM_LIMELIGHT,
+            1.9 + DISTANCE_FROM_LIMELIGHT,
+            2.05 + DISTANCE_FROM_LIMELIGHT,
+            2.2 + DISTANCE_FROM_LIMELIGHT,
+            2.35 + DISTANCE_FROM_LIMELIGHT,
+            2.5 + DISTANCE_FROM_LIMELIGHT,
+            2.6 + DISTANCE_FROM_LIMELIGHT
     };
     private static final double[] FIRING_Y = {
             43,
