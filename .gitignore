@@ -1,5 +1,8 @@
 bin/
 build/
+logs/
+ctre_sim/
+networktables.json
 
 .vs/
 .vscode/

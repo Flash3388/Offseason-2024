@@ -1,13 +1,21 @@
 package frc.robot.subsystems;
 
-import com.revrobotics.*;
+import com.revrobotics.AbsoluteEncoder;
+import com.revrobotics.CANSparkBase;
+import com.revrobotics.CANSparkLowLevel;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkAbsoluteEncoder;
+import com.revrobotics.SparkLimitSwitch;
+import com.revrobotics.SparkPIDController;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
+import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.apache.commons.math3.analysis.interpolation.DividedDifferenceInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunctionLagrangeForm;
 
 public class Arm extends SubsystemBase {
@@ -37,6 +45,12 @@ public class Arm extends SubsystemBase {
     private boolean didReportEncoderError;
 
     private static final double[] FIRING_X = {
+            // give interpolation a 0 starting point
+            0,
+            0.1 + DISTANCE_FROM_LIMELIGHT,
+            0.5 + DISTANCE_FROM_LIMELIGHT,
+            0.7 + DISTANCE_FROM_LIMELIGHT,
+            // in range
             1 + DISTANCE_FROM_LIMELIGHT,
             1.1 + DISTANCE_FROM_LIMELIGHT,
             1.5 + DISTANCE_FROM_LIMELIGHT,
@@ -54,6 +68,12 @@ public class Arm extends SubsystemBase {
             3.9 + DISTANCE_FROM_LIMELIGHT
     };
     private static final double[] FIRING_Y = {
+            // give interpolation a 0 starting point
+            36,
+            37,
+            39,
+            41,
+            // in range
             43,
             44,
             48,
@@ -74,7 +94,8 @@ public class Arm extends SubsystemBase {
     private static final double MIN_FIRING_DISTANCE = 1 + DISTANCE_FROM_LIMELIGHT;
     private static final double MAX_FIRING_DISTANCE = 3.5 + DISTANCE_FROM_LIMELIGHT;
 
-    private final PolynomialFunctionLagrangeForm firingFunction;
+    private final UnivariateFunction firingFunction;
+
 
     public Arm() {
         followerMotor = new CANSparkMax(RobotMap.ARM_FOLLOW, CANSparkLowLevel.MotorType.kBrushless);
