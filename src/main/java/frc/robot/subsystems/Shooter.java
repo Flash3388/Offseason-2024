@@ -1,10 +1,10 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.*;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
+import org.apache.commons.math3.analysis.polynomials.PolynomialFunctionLagrangeForm;
 
 public class Shooter extends SubsystemBase {
     private CANSparkMax motorRight;
@@ -16,6 +16,8 @@ public class Shooter extends SubsystemBase {
     private SparkPIDController pidControllerLeft;
     public static double TOLERANCE = 150;
     private static double KF = 0.000185;
+
+
 
     public Shooter() {
         motorRight = new CANSparkMax(RobotMap.SHOOTER_MOTOR_RIGHT, CANSparkLowLevel.MotorType.kBrushless);
@@ -30,14 +32,14 @@ public class Shooter extends SubsystemBase {
         pidControllerRight = motorRight.getPIDController();
         pidControllerLeft = motorLeft.getPIDController();
 
-        pidControllerRight.setP(RobotMap.SHOOTER_RIGHT_KP1);
+        pidControllerRight.setP(RobotMap.SHOOTER_RIGHT_KP);
         pidControllerRight.setI(0);
         pidControllerRight.setD(0);
-        pidControllerLeft.setP(RobotMap.SHOOTER_LEFT_KP1);
+        pidControllerLeft.setP(RobotMap.SHOOTER_LEFT_KP);
         pidControllerLeft.setI(0);
         pidControllerLeft.setD(0);
-        pidControllerRight.setFF(RobotMap.SHOOTER_RIGHT_KP2);
-        pidControllerLeft.setFF(RobotMap.SHOOTER_LEFT_KP2);
+        pidControllerRight.setFF(RobotMap.SHOOTER_RIGHT_KF);
+        pidControllerLeft.setFF(RobotMap.SHOOTER_LEFT_KF);
 
         pidControllerRight.setOutputRange(-1, 1);
         pidControllerLeft.setOutputRange(-1, 1);
@@ -47,6 +49,8 @@ public class Shooter extends SubsystemBase {
 
         motorRight.setIdleMode(CANSparkBase.IdleMode.kCoast);
         motorLeft.setIdleMode(CANSparkBase.IdleMode.kCoast);
+
+
 
         SmartDashboard.putNumber("KF Shooter", KF);
     }
@@ -80,10 +84,13 @@ public class Shooter extends SubsystemBase {
         pidControllerLeft.setIAccum(0);
     }
 
+
     @Override
     public void periodic() {
         SmartDashboard.putNumber("velocity right", getVelocityRight());
         SmartDashboard.putNumber("velocity left", getVelocityLeft());
+        SmartDashboard.putNumber("motorLeftOutput", motorLeft.getAppliedOutput());
+        SmartDashboard.putNumber("motorRightOutput", motorRight.getAppliedOutput());
     }
 
     public boolean isAtRangePIDRight(double speed) {

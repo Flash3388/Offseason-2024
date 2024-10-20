@@ -12,14 +12,16 @@ import frc.robot.subsystems.Arm;
 
 public class ArmCommand extends Command {
 
-    private static final double MAX_HOLD_ARM_TIME_SEC = 60;
+    private static final double MAX_HOLD_ARM_TIME_SEC = 200;
     private static final double POSITION_DROP = -1;
     private static final double MAX_VELOCITY_RPM = 1000;
     private static final double MAX_ACCELERATION_RPM_S = 200;
+    private static final double ARM_STUCK_TIME_SEC = 5;
 
     private final Arm arm;
     private final Timer limitTimer;
     private final TrapezoidProfile.Constraints motionProfileConstraints;
+    private final Timer armStuckTimer;
 
     private TrapezoidProfile motionProfile;
     private TrapezoidProfile.State motionProfileGoal;
@@ -30,16 +32,23 @@ public class ArmCommand extends Command {
     private double newPosition;
     private boolean hasNewPosition;
     private boolean isInTarget;
+    private double lastIterationPosition;
+    private boolean armStuckTimerRunning;
+    private boolean armKnownStuck;
 
     public ArmCommand(Arm arm) {
         this.arm = arm;
         this.limitTimer = new Timer();
         this.motionProfileConstraints = new TrapezoidProfile.Constraints(MAX_VELOCITY_RPM, MAX_ACCELERATION_RPM_S);
+        this.armStuckTimer = new Timer();
 
         this.position = POSITION_DROP;
         this.newPosition = POSITION_DROP;
         this.hasNewPosition = false;
         this.isInTarget = false;
+        this.lastIterationPosition = 0;
+        this.armStuckTimerRunning = false;
+        this.armKnownStuck = false;
 
         this.motionProfileGoal = new TrapezoidProfile.State();
         this.motionProfileSetPoint = new TrapezoidProfile.State();
@@ -51,6 +60,7 @@ public class ArmCommand extends Command {
         SmartDashboard.putNumber("ArmCommandTimeToLimit", -1);
         SmartDashboard.putNumber("ArmCommandProfileSP", -1);
         SmartDashboard.putBoolean("ArmCommandProfileFinished", false);
+        SmartDashboard.putBoolean("ArmCommandStuck", false);
 
         addRequirements(arm);
     }
@@ -72,6 +82,12 @@ public class ArmCommand extends Command {
             SmartDashboard.putNumber("ArmCommandTarget", position);
             SmartDashboard.putNumber("ArmCommandTimeToLimit", -1);
             SmartDashboard.putBoolean("ArmCommandProfileFinished", false);
+            SmartDashboard.putBoolean("ArmCommandStuck", false);
+
+            lastIterationPosition = 0;
+            armStuckTimerRunning = false;
+            armKnownStuck = false;
+            armStuckTimer.stop();
 
             if (position > 0) {
                 motionProfile = new TrapezoidProfile(motionProfileConstraints);
@@ -114,6 +130,28 @@ public class ArmCommand extends Command {
         } else  {
             arm.setMoveToPosition(position);
         }
+
+        double currentArmPosition = arm.getAngleDegrees();
+        if (!isInTarget && MathUtil.isNear(lastIterationPosition, arm.getAngleDegrees(), 2)) {
+            if (!armKnownStuck) {
+                if (!armStuckTimerRunning) {
+                    armStuckTimerRunning = true;
+                    armStuckTimer.restart();
+                }
+
+                if (armStuckTimer.hasElapsed(ARM_STUCK_TIME_SEC)) {
+                    armKnownStuck = true;
+                    SmartDashboard.putBoolean("ArmCommandStuck", true);
+                    DriverStation.reportError("Arm is stuck and is no longer moving", false);
+                }
+            }
+        } else if (armKnownStuck || armStuckTimerRunning) {
+            armKnownStuck = false;
+            armStuckTimerRunning = false;
+            armStuckTimer.stop();
+            SmartDashboard.putBoolean("ArmCommandStuck", false);
+        }
+        lastIterationPosition = currentArmPosition;
 
         double currentTime = limitTimer.get();
         int timeLimitLeft = (int) (MAX_HOLD_ARM_TIME_SEC - currentTime);

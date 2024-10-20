@@ -1,11 +1,22 @@
 package frc.robot.subsystems;
 
-import com.revrobotics.*;
+import com.revrobotics.AbsoluteEncoder;
+import com.revrobotics.CANSparkBase;
+import com.revrobotics.CANSparkLowLevel;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkAbsoluteEncoder;
+import com.revrobotics.SparkLimitSwitch;
+import com.revrobotics.SparkPIDController;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
+import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.apache.commons.math3.analysis.interpolation.DividedDifferenceInterpolator;
+import org.apache.commons.math3.analysis.polynomials.PolynomialFunctionLagrangeForm;
 
 public class Arm extends SubsystemBase {
 
@@ -19,6 +30,7 @@ public class Arm extends SubsystemBase {
     private static final int POSITION_PID_SLOT = 0;
     private static final double HIGH_CURRENT_TO_WARN = 40;
     private static final double HIGH_TEMPERATURE_TO_WARN = 70;
+    private static final double DISTANCE_FROM_LIMELIGHT = 0.35;
 
     private final CANSparkMax followerMotor;
     private final CANSparkMax masterMotor;
@@ -29,6 +41,61 @@ public class Arm extends SubsystemBase {
     private final SparkPIDController pidController;
     private final AbsoluteEncoder absoluteEncoder;
     private final RelativeEncoder relativeEncoder;
+
+    private boolean didReportEncoderError;
+
+    private static final double[] FIRING_X = {
+            // give interpolation a 0 starting point
+            0,
+            0.1 + DISTANCE_FROM_LIMELIGHT,
+            0.5 + DISTANCE_FROM_LIMELIGHT,
+            0.7 + DISTANCE_FROM_LIMELIGHT,
+            // in range
+            1 + DISTANCE_FROM_LIMELIGHT,
+            1.1 + DISTANCE_FROM_LIMELIGHT,
+            1.5 + DISTANCE_FROM_LIMELIGHT,
+            1.7 + DISTANCE_FROM_LIMELIGHT,
+            1.9 + DISTANCE_FROM_LIMELIGHT,
+            2.05 + DISTANCE_FROM_LIMELIGHT,
+            2.2 + DISTANCE_FROM_LIMELIGHT,
+            2.35 + DISTANCE_FROM_LIMELIGHT,
+            2.5 + DISTANCE_FROM_LIMELIGHT,
+            2.6 + DISTANCE_FROM_LIMELIGHT,
+            2.8 + DISTANCE_FROM_LIMELIGHT,
+            3.2 + DISTANCE_FROM_LIMELIGHT,
+            3.5 + DISTANCE_FROM_LIMELIGHT,
+            3.7 + DISTANCE_FROM_LIMELIGHT,
+            3.9 + DISTANCE_FROM_LIMELIGHT
+    };
+    private static final double[] FIRING_Y = {
+            // give interpolation a 0 starting point
+            36,
+            37,
+            39,
+            41,
+            // in range
+            43,
+            44,
+            48,
+            50,
+            52,
+            54,
+            56,
+            57,
+            58,
+            60,
+            60.5,
+            61,
+            61.7,
+            63,
+            65
+    };
+
+    private static final double MIN_FIRING_DISTANCE = 1 + DISTANCE_FROM_LIMELIGHT;
+    private static final double MAX_FIRING_DISTANCE = 3.5 + DISTANCE_FROM_LIMELIGHT;
+
+    private final UnivariateFunction firingFunction;
+
 
     public Arm() {
         followerMotor = new CANSparkMax(RobotMap.ARM_FOLLOW, CANSparkLowLevel.MotorType.kBrushless);
@@ -68,10 +135,27 @@ public class Arm extends SubsystemBase {
         masterMotor.setSoftLimit(CANSparkBase.SoftLimitDirection.kReverse, (float) RobotMap.ARM_FLOOR_ANGLE);
 
         exitBrake();
+
+        firingFunction = new PolynomialFunctionLagrangeForm(FIRING_X, FIRING_Y);
+        didReportEncoderError = false;
+
+        SmartDashboard.putData("ArmExitBrake", Commands.runOnce(this::exitBrake));
     }
 
     public void move(double speed) {
         masterMotor.set(speed);
+    }
+
+    public double calculateFiringAngleDegrees(double distanceMeters) {
+        if (!isInRangeForAutoShoot(distanceMeters)) {
+            return -1;
+        }
+
+        return firingFunction.value(distanceMeters);
+    }
+
+    public boolean isInRangeForAutoShoot(double distanceMeters) {
+        return distanceMeters >= MIN_FIRING_DISTANCE && distanceMeters <= MAX_FIRING_DISTANCE;
     }
 
     public void setMoveToPosition(double positionDegrees) {
@@ -145,5 +229,16 @@ public class Arm extends SubsystemBase {
 
         boolean shouldWarnTemp = tempMaster > HIGH_TEMPERATURE_TO_WARN || tempFollower > HIGH_TEMPERATURE_TO_WARN;
         SmartDashboard.putBoolean("ArmHighMotorTemp", shouldWarnTemp);
+
+        boolean hasEncoderError = getAngleDegrees() == 0;
+        SmartDashboard.putBoolean("ArmEncoderError", hasEncoderError);
+
+        if (hasEncoderError && !didReportEncoderError) {
+            didReportEncoderError = true;
+            DriverStation.reportError("Arm encoder reporting 0 position, possibly not connected", false);
+        } else if (!hasEncoderError && didReportEncoderError) {
+            didReportEncoderError = false;
+            DriverStation.reportError("Arm encoder now reporting good position", false);
+        }
     }
 }

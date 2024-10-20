@@ -2,6 +2,11 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.util.PathPlannerLogging;
+import edu.wpi.first.apriltag.AprilTag;
+import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
+import edu.wpi.first.math.estimator.PoseEstimator;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -11,6 +16,7 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
@@ -18,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.RobotMap;
+import frc.robot.TargetInfo;
 
 import static edu.wpi.first.units.Units.Meters;
 
@@ -25,12 +32,12 @@ public class Swerve extends SubsystemBase {
 
 
     private final Pigeon2 pigeon;
-    private final SwerveDriveOdometry odometry;
     private final SwerveModule[] swerveModules;
     private final SwerveDriveKinematics kinematics;
     private final SysIdRoutine sysIdRoutine;
     private final Field2d field;
     private final PIDController rotationPID;
+    private final SwerveDrivePoseEstimator swerveDrivePoseEstimator;
 
     public Swerve(SwerveModule[] swerveModules) {
         sysIdRoutine = new SysIdRoutine(new SysIdRoutine.Config(), new SysIdRoutine.Mechanism(this::volatageDrive, this::sysidLog, this));
@@ -44,14 +51,25 @@ public class Swerve extends SubsystemBase {
         );
         pigeon = new Pigeon2(RobotMap.PIGEON);
         pigeon.setYaw(0);
-        odometry = new SwerveDriveOdometry(kinematics, getHeadingDegrees(), getModulesPosition());
+
         rotationPID = new PIDController(RobotMap.ROTATION_FIX_KP,RobotMap.ROTATION_FIX_KI,RobotMap.ROTATION_FIX_KD);
+
+        swerveDrivePoseEstimator = new SwerveDrivePoseEstimator(
+                kinematics,
+                getHeadingDegrees(),
+                getModulesPosition(),
+                new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
+
         field = new Field2d();
         SmartDashboard.putData("Field", field);
 
         PathPlannerLogging.setLogActivePathCallback((poses)-> {
             field.getObject("path").setPoses(poses);
         } );
+    }
+
+    public Field2d getField() {
+        return field;
     }
 
     public Rotation2d getHeadingDegrees(){
@@ -62,10 +80,6 @@ public class Swerve extends SubsystemBase {
         }
 
         return Rotation2d.fromDegrees(degrees);
-    }
-
-    public Pose2d getPose() {
-        return odometry.getPoseMeters();
     }
 
     public SwerveModulePosition[] getModulesPosition() {
@@ -90,6 +104,13 @@ public class Swerve extends SubsystemBase {
         return kinematics.toChassisSpeeds(new SwerveDriveKinematics.SwerveDriveWheelStates(getModuleStates()));
     }
 
+    public Pose2d getPose() {
+        return swerveDrivePoseEstimator.getEstimatedPosition();
+    }
+
+    public void updatePoseEstimatorByVision(Pose2d estimatedRobotPose, double timestamp) {
+        swerveDrivePoseEstimator.addVisionMeasurement(estimatedRobotPose, timestamp);
+    }
 
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
         return sysIdRoutine.quasistatic(direction);
@@ -157,6 +178,30 @@ public class Swerve extends SubsystemBase {
         }
     }
 
+    public TargetInfo getTargetInfoFromCurrentPos(Pose2d other) {
+        Pose2d pose = getPose();
+        return getTargetInfo(pose, other);
+    }
+
+    public TargetInfo getTargetInfo(Pose2d robot, Pose2d other) {
+        double x = robot.getX() - other.getX();
+        double y = robot.getY() - other.getY();
+
+        double distance = Math.sqrt(Math.pow(x,2) + Math.pow(y,2));
+        double angle = Math.toDegrees(Math.atan2(y, x));
+        angle += 180;
+
+        return new TargetInfo(distance, angle);
+    }
+
+    public void resetOdometeryToStart() {
+        swerveDrivePoseEstimator.resetPosition(
+                getHeadingDegrees(),
+                getModulesPosition(),
+                new Pose2d(0, 0, Rotation2d.fromDegrees(0))
+        );
+    }
+
     @Override
     public void periodic() {
         Rotation2d rotation = getHeadingDegrees();
@@ -167,8 +212,11 @@ public class Swerve extends SubsystemBase {
             swerveModules[i].periodic();
         }
 
-        odometry.update(rotation, getModulesPosition());
-        field.setRobotPose(odometry.getPoseMeters());
+        Pose2d robotPose = swerveDrivePoseEstimator.updateWithTime(
+                Timer.getFPGATimestamp(),
+                getHeadingDegrees(),
+                getModulesPosition());
+        field.setRobotPose(robotPose);
     }
 
     private void sysidLog(SysIdRoutineLog log) {
@@ -184,13 +232,5 @@ public class Swerve extends SubsystemBase {
                 .voltage(frontRight.getOutputVoltage())
                 .linearPosition(Meters.of(frontRight.getPositionMeters()))
                 .linearVelocity(frontRight.getLinearVelocity());
-    }
-
-    public void resetOdometeryToStart() {
-        odometry.resetPosition(
-                getHeadingDegrees(),
-                getModulesPosition(),
-                new Pose2d(0, 0, Rotation2d.fromDegrees(0))
-        );
     }
 }

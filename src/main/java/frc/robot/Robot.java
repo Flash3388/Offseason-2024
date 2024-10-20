@@ -6,6 +6,8 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -14,6 +16,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -23,13 +26,20 @@ import frc.robot.commands.DriveWithXBox;
 import frc.robot.commands.ForwardNote;
 import frc.robot.commands.IntakeIn;
 import frc.robot.commands.IntakeOut;
+import frc.robot.commands.IntakeOutToShooter;
+import frc.robot.commands.RotateToAngle;
 import frc.robot.commands.ShooterAMP;
 import frc.robot.commands.ShooterSpeaker;
+import frc.robot.commands.ShooterSpeakerSpeed;
+import frc.robot.commands.UpAndDown;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Climb;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.LimelightBanana;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Swerve;
+
+import java.util.Set;
 
 public class Robot extends TimedRobot {
 
@@ -38,6 +48,7 @@ public class Robot extends TimedRobot {
     private Shooter shooter;
     private Intake intake;
     private Arm arm;
+    private LimelightBanana limelight;
     private XboxController xboxController;
     private XboxController xboxControllerSystem;
 
@@ -53,6 +64,7 @@ public class Robot extends TimedRobot {
         this.shooter = new Shooter();
         this.intake = new Intake();
         this.arm = new Arm();
+        limelight = new LimelightBanana(swerve);
 
         this.xboxController = new XboxController(0);
         this.xboxControllerSystem = new XboxController(1);
@@ -62,32 +74,63 @@ public class Robot extends TimedRobot {
         DriveWithXBox driveWithXBox = new DriveWithXBox(swerve, xboxController);
         swerve.setDefaultCommand(driveWithXBox);
 
-       /*new JoystickButton(xboxController, XboxController.Button.kA.value)
-                .onTrue(new UpAndDown(climb, true));
-        new JoystickButton(xboxController, XboxController.Button.kB.value)
-                .onTrue(new UpAndDown(climb, false));
-        */
-
-        Command collectFromFloor = collectFromFloor();
-        SmartDashboard.putData("CollectCommand", collectFromFloor);
-
-        new JoystickButton(xboxControllerSystem, XboxController.Button.kY.value).onTrue(shooterAMP());
-        new JoystickButton(xboxControllerSystem, XboxController.Button.kB.value).onTrue(shooterSpeaker());
-        new JoystickButton(xboxControllerSystem, XboxController.Button.kX.value)
-                .whileTrue(new IntakeOut(intake));
-        new JoystickButton(xboxControllerSystem, XboxController.Button.kA.value).onTrue(collectFromFloor);
-
-        new POVButton(xboxControllerSystem, 0).onTrue(Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_AMP_ANGLE)));
-        new POVButton(xboxControllerSystem, 180).onTrue(Commands.runOnce(() -> armCommand.gentlyDrop()));
-
-        new JoystickButton(xboxController, XboxController.Button.kStart.value)
-                .onTrue(Commands.runOnce(swerve::resetOdometeryToStart));
-
         NamedCommands.registerCommand("collect", collectFromFloor());
         NamedCommands.registerCommand("shootAutoFirst", shooterSpeaker());
         NamedCommands.registerCommand("shootAutoSecond", shooterSpeaker());
 
-        SmartDashboard.putBoolean("ArmDisabledBrake", false);
+        new POVButton(xboxController, 0)
+                .onTrue(new UpAndDown(climb, true));
+        new POVButton(xboxController, 180)
+                .onTrue(new UpAndDown(climb, false));
+
+        new JoystickButton(xboxController, XboxController.Button.kY.value)
+                .onTrue(shooterAMP());
+        new JoystickButton(xboxController, XboxController.Button.kB.value)
+                .onTrue(shooterSpeaker());
+        new JoystickButton(xboxController, XboxController.Button.kX.value)
+                .whileTrue(new IntakeOut(intake));
+        new JoystickButton(xboxController,XboxController.Button.kA.value)
+                .onTrue(collectFromFloor());
+
+        new POVButton(xboxController, 90)
+                .onTrue(new IntakeIn(intake));
+        new POVButton(xboxController, 270)
+                .whileTrue(new IntakeOutToShooter(intake));
+        new JoystickButton(xboxController, XboxController.Button.kRightBumper.value)
+                .onTrue(Commands.runOnce(() -> armCommand.gentlyDrop()));
+        new JoystickButton(xboxController, XboxController.Button.kLeftBumper.value)
+                .onTrue(Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_CLIMB_ANGLE)));
+        new JoystickButton(xboxController, XboxController.Button.kBack.value)
+                .onTrue(Commands.runOnce(swerve::resetOdometeryToStart));
+
+        Command autoShootCommand = new DeferredCommand(()-> {
+            TargetInfo targetInfo = swerve.getTargetInfoFromCurrentPos(FieldInfo.getOurSpeakerPose());
+            double angle = arm.calculateFiringAngleDegrees(targetInfo.getDistance());
+
+            SmartDashboard.putNumber("AutoShootStartHeading", swerve.getHeadingDegrees().getDegrees());
+            SmartDashboard.putNumber("AutoShootTargetAngle", targetInfo.getAngle());
+            SmartDashboard.putNumber("AutoShootNeededArmAngle", angle);
+            SmartDashboard.putNumber("AutoShootTargetDistance", targetInfo.getDistance());
+
+            if(angle < 0) {
+                DriverStation.reportWarning("Cannot auto shoot, not in supported range", false);
+                return null;
+            }
+
+            return new SequentialCommandGroup(
+                    new RotateToAngle(swerve, targetInfo.getAngle()),
+                    Commands.runOnce(() -> armCommand.changeTarget(angle)),
+                    Commands.waitUntil(() -> armCommand.didReachTarget()),
+                    new ParallelCommandGroup(
+                            new ForwardNote(shooter, intake, RobotMap.SHOOTER_SPEED_SPEAKER),
+                            new ShooterSpeakerSpeed(shooter, intake, RobotMap.SHOOTER_SPEED_SPEAKER)
+                    )
+
+            );
+        }, Set.of(shooter, swerve, intake));
+
+        new JoystickButton(xboxController, XboxController.Button.kStart.value)
+                .onTrue(autoShootCommand);
     }
 
     @Override
@@ -124,7 +167,10 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
+        this.velocity = 0;
+        this.angle = 0;
         armCommand.changeTarget(RobotMap.ARM_DEFAULT_ANGLE);
+        shooter.stop();
     }
 
     @Override
@@ -163,20 +209,38 @@ public class Robot extends TimedRobot {
 
     }
 
+    double velocity;
+    double angle;
     @Override
     public void testInit() {
-
+        armCommand.stopHolding();
+        velocity = 0;
+        angle = 0;
+        shooter.stop();
+        SmartDashboard.putNumber("velocity", 0);
+        SmartDashboard.putNumber("angle", 0 );
     }
 
     @Override
     public void testPeriodic() {
-
+        double velocity = SmartDashboard.getNumber("velocity", 0);
+        double angle = SmartDashboard.getNumber("angle", 0);
+        if (velocity >= 0 && this.velocity != velocity) {
+            shooter.movePid(velocity);
+            this.velocity = velocity;
+        }
+        if(angle > 0 && this.angle != angle){
+            armCommand.changeTarget(angle);
+            this.angle = angle;
+        }
     }
 
     @Override
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
 
+        TargetInfo targetInfo = swerve.getTargetInfoFromCurrentPos(FieldInfo.getOurSpeakerPose());
+        SmartDashboard.putBoolean("AutoShootSpeakerPossible", arm.isInRangeForAutoShoot(targetInfo.getDistance()));
     }
 
     @Override
@@ -190,7 +254,7 @@ public class Robot extends TimedRobot {
                 Commands.waitUntil(() -> armCommand.didReachTarget()),
                 new ParallelCommandGroup(
                         new ShooterAMP(shooter, intake),
-                        new ForwardNote(shooter, intake, false)
+                        new ForwardNote(shooter, intake, RobotMap.SHOOTER_SPEED_AMP)
                 ),
                 Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_DEFAULT_ANGLE))
         );
@@ -201,8 +265,8 @@ public class Robot extends TimedRobot {
                 Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_SPEAKER_ANGLE)),
                 Commands.waitUntil(() -> armCommand.didReachTarget()),
                 new ParallelCommandGroup(
-                        new ShooterSpeaker(shooter, intake),
-                        new ForwardNote(shooter, intake, true)
+                        new ShooterSpeaker(shooter, intake, RobotMap.SHOOTER_SPEED_SPEAKER),
+                        new ForwardNote(shooter, intake, RobotMap.SHOOTER_SPEED_SPEAKER)
                 ),
                 Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_DEFAULT_ANGLE))
         );

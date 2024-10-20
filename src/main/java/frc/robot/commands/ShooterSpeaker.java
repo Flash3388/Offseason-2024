@@ -12,9 +12,10 @@ public class ShooterSpeaker extends Command {
     private Intake intake;
     private Timer timer;
 
-    public ShooterSpeaker(Shooter shooter, Intake intake) {
+    public ShooterSpeaker(Shooter shooter, Intake intake, double speed) {
         this.shooter = shooter;
-        this.speed = RobotMap.SHOOTER_SPEED_SPEAKER;
+        //this.speed = RobotMap.SHOOTER_SPEED_SPEAKER;
+        this.speed = speed;
         this.intake = intake;
         this.timer = new Timer();
         addRequirements(shooter);

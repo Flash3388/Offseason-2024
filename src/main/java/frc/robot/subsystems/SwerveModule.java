@@ -27,10 +27,11 @@ public class SwerveModule {
     private static final double WHEEL_RADIUS = 0.0508;
     private static final double WHEEL_CIRCUMFERENCE = 2 * Math.PI * WHEEL_RADIUS;
 
-    private static final double STEER_P = 0.56; // 0.05 //0.052 0053 0.054
+    private static final double STEER_P = 0.59; // 0.05 //0.052 0053 0.054
     private static final double STEER_I = 0.00003; //0
     private static final double STEER_D = 0.01;
     private static final double STEER_F = 0.;
+    private static final double STEER_IZONE = 5;
 
     private static final double DRIVE_P = 0.0003;//0.0003;
     private static final double DRIVE_I = 0;//5e-7;
@@ -80,6 +81,7 @@ public class SwerveModule {
         steerPID.setI(STEER_I);
         steerPID.setD(STEER_D);
         steerPID.setFF(STEER_F);
+        steerPID.setIZone(STEER_IZONE);
         steerPID.setOutputRange(-1, 1);
         steerPID.setPositionPIDWrappingMaxInput(STEER_GEAR_RATIO);
         steerPID.setPositionPIDWrappingMinInput(0);
