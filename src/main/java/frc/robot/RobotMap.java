@@ -13,7 +13,7 @@ public class RobotMap {
     public static final double ARM_CLIMB_ANGLE = 110;
 
     public final static double SHOOTER_RIGHT_KP = 0.000003;
-    public final static double SHOOTER_RIGHT_KF = 0.00019;
+    public final static double SHOOTER_RIGHT_KF = 0.00018;
     public final static double SHOOTER_LEFT_KP = 0.00000178;
     public final static double SHOOTER_LEFT_KF = 0.00017;
     public static final int SHOOTER_MOTOR_LEFT = 14;
