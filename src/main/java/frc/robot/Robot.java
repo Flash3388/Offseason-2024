@@ -124,7 +124,10 @@ public class Robot extends TimedRobot {
             );
         }, Set.of(shooter, swerve, intake));
 
+        Command cancelAll = Commands.runOnce(()-> cancel());
+
         new JoystickButton(xboxController, XboxController.Button.kStart.value).onTrue(autoShootCommand);
+        new JoystickButton(xboxController, XboxController.Button.kBack.value).onTrue(cancelAll);
     }
 
     @Override
@@ -273,5 +276,20 @@ public class Robot extends TimedRobot {
                 new IntakeIn(intake),
                 Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_DEFAULT_ANGLE))
         );
+    }
+
+    private void cancel(){
+        Command intakeInFloor = collectFromFloor();
+        Command intakeIn = new IntakeIn(intake);
+        Command shooterSpeaker = shooterSpeaker();
+        Command shooterAMP = shooterAMP();
+        Command climbUp = new UpAndDown(climb, true);
+        Command climbDown = new UpAndDown(climb, false);
+        intakeInFloor.cancel();
+        intakeIn.cancel();
+        shooterSpeaker.cancel();
+        shooterAMP.cancel();
+        climbUp.cancel();
+        climbDown.cancel();
     }
 }
