@@ -1,5 +1,6 @@
 package frc.robot;
 
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathHolonomic;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
@@ -49,6 +50,7 @@ public class Robot extends TimedRobot {
     private Arm arm;
     private LimelightBanana limelight;
     private XboxController xboxController;
+    private XboxController xboxControllerSystem;
 
     private ArmCommand armCommand;
     private boolean shouldBrakeArm;
@@ -65,15 +67,16 @@ public class Robot extends TimedRobot {
         limelight = new LimelightBanana(swerve);
 
         this.xboxController = new XboxController(0);
-
+        this.xboxControllerSystem = new XboxController(1);
         armCommand = new ArmCommand(arm);
         arm.setDefaultCommand(armCommand);
 
         DriveWithXBox driveWithXBox = new DriveWithXBox(swerve, xboxController);
         swerve.setDefaultCommand(driveWithXBox);
 
-        Pose2d fakeTarget = new Pose2d(5.75, 0, Rotation2d.fromDegrees(180));
-        swerve.getField().getObject("target").setPose(fakeTarget);
+        NamedCommands.registerCommand("collect", collectFromFloor());
+        NamedCommands.registerCommand("shootAutoFirst", shooterSpeaker());
+        NamedCommands.registerCommand("shootAutoSecond", shooterSpeaker());
 
         new POVButton(xboxController, 0)
                 .onTrue(new UpAndDown(climb, true));
@@ -97,6 +100,8 @@ public class Robot extends TimedRobot {
                 .onTrue(Commands.runOnce(() -> armCommand.gentlyDrop()));
         new JoystickButton(xboxController, XboxController.Button.kLeftBumper.value)
                 .onTrue(Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_CLIMB_ANGLE)));
+        new JoystickButton(xboxController, XboxController.Button.kBack.value)
+                .onTrue(Commands.runOnce(swerve::resetOdometeryToStart));
 
         Command autoShootCommand = new DeferredCommand(()-> {
             TargetInfo targetInfo = swerve.getTargetInfoFromCurrentPos(FieldInfo.getOurSpeakerPose());
@@ -124,7 +129,8 @@ public class Robot extends TimedRobot {
             );
         }, Set.of(shooter, swerve, intake));
 
-        new JoystickButton(xboxController, XboxController.Button.kStart.value).onTrue(autoShootCommand);
+        new JoystickButton(xboxController, XboxController.Button.kStart.value)
+                .onTrue(autoShootCommand);
     }
 
     @Override
@@ -178,13 +184,13 @@ public class Robot extends TimedRobot {
                 false,
                 false);
         HolonomicPathFollowerConfig holonomicPathFollowerConfig = new HolonomicPathFollowerConfig(
-                new PIDConstants(0.5, 0, 0.00007),
-                new PIDConstants(0.5, 0, 0.00007),
+                new PIDConstants(0.005, 0.00001, 0.00007),
+                new PIDConstants(0.005, 0.00001, 0.00007),
                 4.4169,
                 RobotMap.CHASSIS_RADIUS,
                 replanningConfig
         );
-        PathPlannerPath pathS = PathPlannerPath.fromPathFile("Off-season-check");
+        PathPlannerPath pathS = PathPlannerPath.fromPathFile("ofek1");
         FollowPathHolonomic pathHolonomic = new FollowPathHolonomic(
                 pathS,
                 swerve::getPose,

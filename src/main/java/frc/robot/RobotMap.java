@@ -24,6 +24,11 @@ public class RobotMap {
     public static final int INTAKE_ID_MOTOR = 13;
     public static final int INTAKE_ID_LEFT = 6;
     public static final int INTAKE_ID_RIGHT = 8;
+    public static final double ROTATION_FIX_KP =0.07;
+    public static final double ROTATION_FIX_KI =0;
+    public static final double ROTATION_FIX_KD =0.0001;
+    public static final double ROTATION_FIX_KF =0;
+
 
     public static final int PIGEON = 9;
     public static final double ATTAINBLE_MAX_SPEED_MPS_SWERVE = 4.5;
@@ -35,6 +40,7 @@ public class RobotMap {
     public static final int SWERVE_RF_DRIVE_ID = 41;
     public static final int SWERVE_LB_DRIVE_ID = 61;
     public static final int SWERVE_RB_DRIVE_ID = 31;
+
 
     public static final int SWERVE_LF_STEER_ID = 52;
     public static final int SWERVE_RF_STEER_ID = 42;
