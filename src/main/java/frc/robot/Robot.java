@@ -39,6 +39,7 @@ public class Robot extends TimedRobot {
     private Intake intake;
     private Arm arm;
     private XboxController xboxController;
+    private XboxController xboxControllerSystem;
 
     private ArmCommand armCommand;
     private boolean shouldBrakeArm;
@@ -54,7 +55,7 @@ public class Robot extends TimedRobot {
         this.arm = new Arm();
 
         this.xboxController = new XboxController(0);
-
+        this.xboxControllerSystem = new XboxController(1);
         armCommand = new ArmCommand(arm);
         arm.setDefaultCommand(armCommand);
 
@@ -70,19 +71,21 @@ public class Robot extends TimedRobot {
         Command collectFromFloor = collectFromFloor();
         SmartDashboard.putData("CollectCommand", collectFromFloor);
 
-        new JoystickButton(xboxController, XboxController.Button.kY.value).onTrue(shooterAMP());
-        new JoystickButton(xboxController, XboxController.Button.kB.value).onTrue(shooterSpeaker());
-        new JoystickButton(xboxController, XboxController.Button.kX.value)
+        new JoystickButton(xboxControllerSystem, XboxController.Button.kY.value).onTrue(shooterAMP());
+        new JoystickButton(xboxControllerSystem, XboxController.Button.kB.value).onTrue(shooterSpeaker());
+        new JoystickButton(xboxControllerSystem, XboxController.Button.kX.value)
                 .whileTrue(new IntakeOut(intake));
-        new JoystickButton(xboxController, XboxController.Button.kA.value).onTrue(collectFromFloor);
+        new JoystickButton(xboxControllerSystem, XboxController.Button.kA.value).onTrue(collectFromFloor);
 
-        new POVButton(xboxController, 0).onTrue(Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_AMP_ANGLE)));
-        new POVButton(xboxController, 180).onTrue(Commands.runOnce(() -> armCommand.gentlyDrop()));
+        new POVButton(xboxControllerSystem, 0).onTrue(Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_AMP_ANGLE)));
+        new POVButton(xboxControllerSystem, 180).onTrue(Commands.runOnce(() -> armCommand.gentlyDrop()));
 
         new JoystickButton(xboxController, XboxController.Button.kStart.value)
                 .onTrue(Commands.runOnce(swerve::resetOdometeryToStart));
 
         NamedCommands.registerCommand("collect", collectFromFloor());
+        NamedCommands.registerCommand("shootAutoFirst", shooterSpeaker());
+        NamedCommands.registerCommand("shootAutoSecond", shooterSpeaker());
 
         SmartDashboard.putBoolean("ArmDisabledBrake", false);
     }
@@ -141,7 +144,7 @@ public class Robot extends TimedRobot {
                 RobotMap.CHASSIS_RADIUS,
                 replanningConfig
         );
-        PathPlannerPath pathS = PathPlannerPath.fromPathFile("training");
+        PathPlannerPath pathS = PathPlannerPath.fromPathFile("ofek1");
         FollowPathHolonomic pathHolonomic = new FollowPathHolonomic(
                 pathS,
                 swerve::getPose,

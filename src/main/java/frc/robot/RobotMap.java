@@ -23,7 +23,7 @@ public class RobotMap {
     public static final int INTAKE_ID_MOTOR = 13;
     public static final int INTAKE_ID_LEFT = 6;
     public static final int INTAKE_ID_RIGHT = 8;
-    public static final double ROTATION_FIX_KP =0.002;
+    public static final double ROTATION_FIX_KP =0.07;
     public static final double ROTATION_FIX_KI =0;
     public static final double ROTATION_FIX_KD =0.0001;
     public static final double ROTATION_FIX_KF =0;
