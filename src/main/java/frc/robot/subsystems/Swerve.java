@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
@@ -35,6 +36,7 @@ public class Swerve extends SubsystemBase {
     private final SwerveDriveKinematics kinematics;
     private final SysIdRoutine sysIdRoutine;
     private final Field2d field;
+    private final PIDController rotationPID;
     private final SwerveDrivePoseEstimator swerveDrivePoseEstimator;
 
     public Swerve(SwerveModule[] swerveModules) {
@@ -50,6 +52,8 @@ public class Swerve extends SubsystemBase {
         pigeon = new Pigeon2(RobotMap.PIGEON);
         pigeon.setYaw(0);
 
+        rotationPID = new PIDController(RobotMap.ROTATION_FIX_KP,RobotMap.ROTATION_FIX_KI,RobotMap.ROTATION_FIX_KD);
+
         swerveDrivePoseEstimator = new SwerveDrivePoseEstimator(
                 kinematics,
                 getHeadingDegrees(),
@@ -59,7 +63,9 @@ public class Swerve extends SubsystemBase {
         field = new Field2d();
         SmartDashboard.putData("Field", field);
 
-
+        PathPlannerLogging.setLogActivePathCallback((poses)-> {
+            field.getObject("path").setPoses(poses);
+        } );
     }
 
     public Field2d getField() {
@@ -122,6 +128,13 @@ public class Swerve extends SubsystemBase {
         SmartDashboard.putNumber("SwerveCommandX", speeds.vyMetersPerSecond);
         SmartDashboard.putNumber("SwerveCommandY", speeds.vxMetersPerSecond);
         SmartDashboard.putNumber("SwerveCommandRot", speeds.omegaRadiansPerSecond);
+        if(speeds.omegaRadiansPerSecond ==0){
+            double currentHeading = getHeadingDegrees().getDegrees();
+            if(getHeadingDegrees().getDegrees() > currentHeading+1.5 || getHeadingDegrees().getDegrees() < currentHeading -1.5){
+                double newRot = rotationPID.calculate(getHeadingDegrees().getDegrees(),currentHeading);
+                speeds = new ChassisSpeeds(speeds.vxMetersPerSecond,speeds.vyMetersPerSecond,newRot);
+            }
+        }
 
         SwerveModuleState[] swerveModuleStates = kinematics.toSwerveModuleStates(speeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, RobotMap.ATTAINBLE_MAX_SPEED_MPS_SWERVE);
@@ -179,6 +192,14 @@ public class Swerve extends SubsystemBase {
         angle += 180;
 
         return new TargetInfo(distance, angle);
+    }
+
+    public void resetOdometeryToStart() {
+        swerveDrivePoseEstimator.resetPosition(
+                getHeadingDegrees(),
+                getModulesPosition(),
+                new Pose2d(0, 0, Rotation2d.fromDegrees(0))
+        );
     }
 
     @Override
