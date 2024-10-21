@@ -279,17 +279,8 @@ public class Robot extends TimedRobot {
     }
 
     private void cancel(){
-        Command intakeInFloor = collectFromFloor();
-        Command intakeIn = new IntakeIn(intake);
-        Command shooterSpeaker = shooterSpeaker();
-        Command shooterAMP = shooterAMP();
-        Command climbUp = new UpAndDown(climb, true);
-        Command climbDown = new UpAndDown(climb, false);
-        intakeInFloor.cancel();
-        intakeIn.cancel();
-        shooterSpeaker.cancel();
-        shooterAMP.cancel();
-        climbUp.cancel();
-        climbDown.cancel();
+        intake.getCurrentCommand().cancel();
+        shooter.getCurrentCommand().cancel();
+        climb.getCurrentCommand().cancel();
     }
 }
