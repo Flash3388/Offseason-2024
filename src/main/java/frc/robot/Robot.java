@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -51,7 +52,8 @@ public class Robot extends TimedRobot {
     private LimelightBanana limelight;
     private XboxController xboxController;
     private XboxController xboxControllerSystem;
-
+    private SendableChooser<Command> autoChooser;
+    private Command autoCommand = null;
     private ArmCommand armCommand;
     private boolean shouldBrakeArm;
 
@@ -76,31 +78,30 @@ public class Robot extends TimedRobot {
 
         NamedCommands.registerCommand("collect", collectFromFloor());
         NamedCommands.registerCommand("shootAutoFirst", shooterSpeaker());
-        NamedCommands.registerCommand("shootAutoSecond", shooterSpeaker());
 
-        new POVButton(xboxController, 0)
+        new POVButton(xboxControllerSystem, 0)
                 .onTrue(new UpAndDown(climb, true));
-        new POVButton(xboxController, 180)
+        new POVButton(xboxControllerSystem, 180)
                 .onTrue(new UpAndDown(climb, false));
 
-        new JoystickButton(xboxController, XboxController.Button.kY.value)
+        new JoystickButton(xboxControllerSystem, XboxController.Button.kY.value)
                 .onTrue(shooterAMP());
-        new JoystickButton(xboxController, XboxController.Button.kB.value)
+        new JoystickButton(xboxControllerSystem, XboxController.Button.kB.value)
                 .onTrue(shooterSpeaker());
-        new JoystickButton(xboxController, XboxController.Button.kX.value)
+        new JoystickButton(xboxControllerSystem, XboxController.Button.kX.value)
                 .whileTrue(new IntakeOut(intake));
-        new JoystickButton(xboxController,XboxController.Button.kA.value)
+        new JoystickButton(xboxControllerSystem,XboxController.Button.kA.value)
                 .onTrue(collectFromFloor());
 
-        new POVButton(xboxController, 90)
+        new POVButton(xboxControllerSystem, 90)
                 .onTrue(new IntakeIn(intake));
-        new POVButton(xboxController, 270)
+        new POVButton(xboxControllerSystem, 270)
                 .whileTrue(new IntakeOutToShooter(intake));
-        new JoystickButton(xboxController, XboxController.Button.kRightBumper.value)
+        new JoystickButton(xboxControllerSystem, XboxController.Button.kRightBumper.value)
                 .onTrue(Commands.runOnce(() -> armCommand.gentlyDrop()));
-        new JoystickButton(xboxController, XboxController.Button.kLeftBumper.value)
+        new JoystickButton(xboxControllerSystem, XboxController.Button.kLeftBumper.value)
                 .onTrue(Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_CLIMB_ANGLE)));
-        new JoystickButton(xboxController, XboxController.Button.kBack.value)
+        new JoystickButton(xboxController, XboxController.Button.kRightBumper.value)
                 .onTrue(Commands.runOnce(swerve::resetOdometeryToStart));
 
         Command autoShootCommand = new DeferredCommand(()-> {
@@ -134,6 +135,11 @@ public class Robot extends TimedRobot {
 
         Command cancelAll = Commands.runOnce(() -> cancel());
         new JoystickButton(xboxController, XboxController.Button.kBack.value).onTrue(cancelAll);
+        autoChooser = new SendableChooser<>();
+        autoChooser.setDefaultOption("Do Nothing", Commands.none());
+        autoChooser.addOption("Auto-working", autonomo());
+
+        SmartDashboard.putData("SelectAuto", autoChooser);
     }
 
     @Override
@@ -180,9 +186,24 @@ public class Robot extends TimedRobot {
     public void teleopPeriodic() {
 
     }
+    @Override
+    public void autonomousExit() {
+        if (autoCommand != null) {
+            autoCommand.cancel();
+            autoCommand = null;
+        }
+    }
 
     @Override
     public void autonomousInit() {
+        swerve.resetOdometeryToStart();
+        autoCommand = autoChooser.getSelected();
+        if (autoCommand != null) {
+            autoCommand.schedule();
+        }
+    }
+        /*
+        //shooterSpeakerAuto().schedule();
         ReplanningConfig replanningConfig = new ReplanningConfig(
                 false,
                 false);
@@ -193,7 +214,7 @@ public class Robot extends TimedRobot {
                 RobotMap.CHASSIS_RADIUS,
                 replanningConfig
         );
-        PathPlannerPath pathS = PathPlannerPath.fromPathFile("ofek1");
+        PathPlannerPath pathS = PathPlannerPath.fromPathFile("auto");
         FollowPathHolonomic pathHolonomic = new FollowPathHolonomic(
                 pathS,
                 swerve::getPose,
@@ -205,7 +226,7 @@ public class Robot extends TimedRobot {
                 },
                 swerve);
         pathHolonomic.schedule();
-    }
+    }*/
 
     @Override
     public void autonomousPeriodic() {
@@ -250,7 +271,19 @@ public class Robot extends TimedRobot {
     public void simulationPeriodic() {
 
     }
+    private Command shooterSpeakerAuto(){
+        return new SequentialCommandGroup(
+                Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_SPEAKER_ANGLE)),
+                Commands.waitUntil(() -> armCommand.didReachTarget()),
+                new ParallelCommandGroup(
+                        new ShooterSpeaker(shooter, intake, RobotMap.SHOOTER_SPEED_SPEAKER),
+                        new ForwardNote(shooter, intake, RobotMap.SHOOTER_SPEED_SPEAKER)
+                ),
+                Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_DEFAULT_ANGLE)),
+                Commands.waitSeconds(3)
+        );
 
+    }
     private Command shooterAMP() {
         return new SequentialCommandGroup(
                 Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_AMP_ANGLE)),
@@ -274,6 +307,36 @@ public class Robot extends TimedRobot {
                 Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_DEFAULT_ANGLE))
         );
     }
+    private Command autonomo(){
+        ReplanningConfig replanningConfig = new ReplanningConfig(
+                false,
+                false);
+        HolonomicPathFollowerConfig holonomicPathFollowerConfig = new HolonomicPathFollowerConfig(
+                new PIDConstants(0.005, 0.00001, 0.00007),
+                new PIDConstants(0.005, 0.00001, 0.00007),
+                4.4169,
+                RobotMap.CHASSIS_RADIUS,
+                replanningConfig
+        );
+        PathPlannerPath pathS = PathPlannerPath.fromPathFile("auto");
+        FollowPathHolonomic pathHolonomicA = new FollowPathHolonomic(
+                pathS,
+                swerve::getPose,
+                swerve::getSpeeds,
+                swerve::drive,
+                holonomicPathFollowerConfig,
+                () -> {
+                    return false;
+                },
+                swerve);
+        return new SequentialCommandGroup(
+                pathHolonomicA,
+                Commands.runOnce(() -> armCommand.gentlyDrop()),
+                Commands.waitUntil(() -> armCommand.didReachTarget()),
+                new IntakeIn(intake),
+                Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_DEFAULT_ANGLE))
+        );
+    }
 
     private Command collectFromFloor() {
         return new SequentialCommandGroup(
@@ -282,6 +345,9 @@ public class Robot extends TimedRobot {
                 new IntakeIn(intake),
                 Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_DEFAULT_ANGLE))
         );
+    }
+    public Command autonomoEmpty(){
+        return Commands.waitSeconds(15);
     }
 
     private void cancel(){
