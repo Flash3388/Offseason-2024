@@ -131,6 +131,9 @@ public class Robot extends TimedRobot {
 
         new JoystickButton(xboxController, XboxController.Button.kStart.value)
                 .onTrue(autoShootCommand);
+
+        Command cancelAll = Commands.runOnce(() -> cancel());
+        new JoystickButton(xboxController, XboxController.Button.kBack.value).onTrue(cancelAll);
     }
 
     @Override
@@ -279,5 +282,17 @@ public class Robot extends TimedRobot {
                 new IntakeIn(intake),
                 Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_DEFAULT_ANGLE))
         );
+    }
+
+    private void cancel(){
+        if(intake.getCurrentCommand() != null){
+            intake.getCurrentCommand().cancel();
+        }
+        if(shooter.getCurrentCommand() != null){
+            shooter.getCurrentCommand().cancel();
+        }
+        if(climb.getCurrentCommand() != null){
+            climb.getCurrentCommand().cancel();
+        }
     }
 }
