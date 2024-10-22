@@ -138,7 +138,6 @@ public class Robot extends TimedRobot {
         autoChooser = new SendableChooser<>();
         autoChooser.setDefaultOption("Do Nothing", Commands.none());
         autoChooser.addOption("Auto-working", autonomo());
-        autoChooser.addOption("Auto-notWorking",autonomoEmpty());
 
         SmartDashboard.putData("SelectAuto", autoChooser);
     }
