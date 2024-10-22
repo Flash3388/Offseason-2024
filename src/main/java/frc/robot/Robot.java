@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -51,7 +52,8 @@ public class Robot extends TimedRobot {
     private LimelightBanana limelight;
     private XboxController xboxController;
     private XboxController xboxControllerSystem;
-
+    private SendableChooser<Command> autoChooser;
+    private Command autoCommand = null;
     private ArmCommand armCommand;
     private boolean shouldBrakeArm;
 
@@ -133,6 +135,12 @@ public class Robot extends TimedRobot {
 
         Command cancelAll = Commands.runOnce(() -> cancel());
         new JoystickButton(xboxController, XboxController.Button.kBack.value).onTrue(cancelAll);
+        autoChooser = new SendableChooser<>();
+        autoChooser.setDefaultOption("Do Nothing", Commands.none());
+        autoChooser.addOption("Auto-working", autonomo());
+        autoChooser.addOption("Auto-notWorking",autonomoEmpty());
+
+        SmartDashboard.putData("SelectAuto", autoChooser);
     }
 
     @Override
@@ -179,9 +187,24 @@ public class Robot extends TimedRobot {
     public void teleopPeriodic() {
 
     }
+    @Override
+    public void autonomousExit() {
+        if (autoCommand != null) {
+            autoCommand.cancel();
+            autoCommand = null;
+        }
+    }
 
     @Override
     public void autonomousInit() {
+
+        autoCommand = autoChooser.getSelected();
+        if (autoCommand != null) {
+            autoCommand.schedule();
+        }
+
+
+        swerve.resetOdometeryToStart();
         autonomo().schedule();
     }
         /*
@@ -327,6 +350,9 @@ public class Robot extends TimedRobot {
                 new IntakeIn(intake),
                 Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_DEFAULT_ANGLE))
         );
+    }
+    public Command autonomoEmpty(){
+        return Commands.waitSeconds(15);
     }
 
     private void cancel(){
