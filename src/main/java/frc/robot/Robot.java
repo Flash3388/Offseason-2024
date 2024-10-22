@@ -197,15 +197,11 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
-
+        swerve.resetOdometeryToStart();
         autoCommand = autoChooser.getSelected();
         if (autoCommand != null) {
             autoCommand.schedule();
         }
-
-
-        swerve.resetOdometeryToStart();
-        autonomo().schedule();
     }
         /*
         //shooterSpeakerAuto().schedule();
