@@ -76,31 +76,30 @@ public class Robot extends TimedRobot {
 
         NamedCommands.registerCommand("collect", collectFromFloor());
         NamedCommands.registerCommand("shootAutoFirst", shooterSpeaker());
-        NamedCommands.registerCommand("shootAutoSecond", shooterSpeaker());
 
-        new POVButton(xboxController, 0)
+        new POVButton(xboxControllerSystem, 0)
                 .onTrue(new UpAndDown(climb, true));
-        new POVButton(xboxController, 180)
+        new POVButton(xboxControllerSystem, 180)
                 .onTrue(new UpAndDown(climb, false));
 
-        new JoystickButton(xboxController, XboxController.Button.kY.value)
+        new JoystickButton(xboxControllerSystem, XboxController.Button.kY.value)
                 .onTrue(shooterAMP());
-        new JoystickButton(xboxController, XboxController.Button.kB.value)
+        new JoystickButton(xboxControllerSystem, XboxController.Button.kB.value)
                 .onTrue(shooterSpeaker());
-        new JoystickButton(xboxController, XboxController.Button.kX.value)
+        new JoystickButton(xboxControllerSystem, XboxController.Button.kX.value)
                 .whileTrue(new IntakeOut(intake));
-        new JoystickButton(xboxController,XboxController.Button.kA.value)
+        new JoystickButton(xboxControllerSystem,XboxController.Button.kA.value)
                 .onTrue(collectFromFloor());
 
-        new POVButton(xboxController, 90)
+        new POVButton(xboxControllerSystem, 90)
                 .onTrue(new IntakeIn(intake));
-        new POVButton(xboxController, 270)
+        new POVButton(xboxControllerSystem, 270)
                 .whileTrue(new IntakeOutToShooter(intake));
-        new JoystickButton(xboxController, XboxController.Button.kRightBumper.value)
+        new JoystickButton(xboxControllerSystem, XboxController.Button.kRightBumper.value)
                 .onTrue(Commands.runOnce(() -> armCommand.gentlyDrop()));
-        new JoystickButton(xboxController, XboxController.Button.kLeftBumper.value)
+        new JoystickButton(xboxControllerSystem, XboxController.Button.kLeftBumper.value)
                 .onTrue(Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_CLIMB_ANGLE)));
-        new JoystickButton(xboxController, XboxController.Button.kBack.value)
+        new JoystickButton(xboxController, XboxController.Button.kRightBumper.value)
                 .onTrue(Commands.runOnce(swerve::resetOdometeryToStart));
 
         Command autoShootCommand = new DeferredCommand(()-> {
@@ -183,6 +182,10 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
+        autonomo().schedule();
+    }
+        /*
+        //shooterSpeakerAuto().schedule();
         ReplanningConfig replanningConfig = new ReplanningConfig(
                 false,
                 false);
@@ -193,7 +196,7 @@ public class Robot extends TimedRobot {
                 RobotMap.CHASSIS_RADIUS,
                 replanningConfig
         );
-        PathPlannerPath pathS = PathPlannerPath.fromPathFile("ofek1");
+        PathPlannerPath pathS = PathPlannerPath.fromPathFile("auto");
         FollowPathHolonomic pathHolonomic = new FollowPathHolonomic(
                 pathS,
                 swerve::getPose,
@@ -205,7 +208,7 @@ public class Robot extends TimedRobot {
                 },
                 swerve);
         pathHolonomic.schedule();
-    }
+    }*/
 
     @Override
     public void autonomousPeriodic() {
@@ -250,7 +253,19 @@ public class Robot extends TimedRobot {
     public void simulationPeriodic() {
 
     }
+    private Command shooterSpeakerAuto(){
+        return new SequentialCommandGroup(
+                Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_SPEAKER_ANGLE)),
+                Commands.waitUntil(() -> armCommand.didReachTarget()),
+                new ParallelCommandGroup(
+                        new ShooterSpeaker(shooter, intake, RobotMap.SHOOTER_SPEED_SPEAKER),
+                        new ForwardNote(shooter, intake, RobotMap.SHOOTER_SPEED_SPEAKER)
+                ),
+                Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_DEFAULT_ANGLE)),
+                Commands.waitSeconds(3)
+        );
 
+    }
     private Command shooterAMP() {
         return new SequentialCommandGroup(
                 Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_AMP_ANGLE)),
@@ -271,6 +286,36 @@ public class Robot extends TimedRobot {
                         new ShooterSpeaker(shooter, intake, RobotMap.SHOOTER_SPEED_SPEAKER),
                         new ForwardNote(shooter, intake, RobotMap.SHOOTER_SPEED_SPEAKER)
                 ),
+                Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_DEFAULT_ANGLE))
+        );
+    }
+    private Command autonomo(){
+        ReplanningConfig replanningConfig = new ReplanningConfig(
+                false,
+                false);
+        HolonomicPathFollowerConfig holonomicPathFollowerConfig = new HolonomicPathFollowerConfig(
+                new PIDConstants(0.005, 0.00001, 0.00007),
+                new PIDConstants(0.005, 0.00001, 0.00007),
+                4.4169,
+                RobotMap.CHASSIS_RADIUS,
+                replanningConfig
+        );
+        PathPlannerPath pathS = PathPlannerPath.fromPathFile("auto");
+        FollowPathHolonomic pathHolonomicA = new FollowPathHolonomic(
+                pathS,
+                swerve::getPose,
+                swerve::getSpeeds,
+                swerve::drive,
+                holonomicPathFollowerConfig,
+                () -> {
+                    return false;
+                },
+                swerve);
+        return new SequentialCommandGroup(
+                pathHolonomicA,
+                Commands.runOnce(() -> armCommand.gentlyDrop()),
+                Commands.waitUntil(() -> armCommand.didReachTarget()),
+                new IntakeIn(intake),
                 Commands.runOnce(() -> armCommand.changeTarget(RobotMap.ARM_DEFAULT_ANGLE))
         );
     }
